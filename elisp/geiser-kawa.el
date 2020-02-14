@@ -102,16 +102,13 @@
   :type '(choice string (repeat string))
   :group 'geiser-kawa)
 
-;; TODO: replace file-name-directory/directory-file-name with expand-file-name
 (geiser-custom--defcustom
     geiser-kawa-manual-path
-    (concat
-     (file-name-directory
-      (directory-file-name
+    (when (executable-find geiser-kawa-binary)
+      (expand-file-name
+       "../doc/kawa-manual.epub"
        (file-name-directory
-        (directory-file-name
-         (executable-find geiser-kawa-binary)))))
-     "doc/kawa-manual.epub")
+        (executable-find geiser-kawa-binary))))
   "Path of kawa manual. Supported formats are `.epub' (using
 `eww-mode') and `.info' (using `info.el')."
   :type 'string
@@ -137,22 +134,24 @@
       geiser-kawa-binary)))
 
 (defun geiser-kawa--make-classpath ()
-  (let ((jars (append
-               (let ((lib-dir (expand-file-name
-                               "../lib/"
-                               (file-name-directory
-                                (executable-find geiser-kawa-binary)))))
-                 (if (and
-                      (not geiser-kawa-use-kawa-version-included-in-kawa-geiser)
-                      (executable-find geiser-kawa-binary)
-                      (file-directory-p lib-dir))
-                     (list
-                      (concat lib-dir "kawa.jar")
-                      (concat lib-dir "servlet.jar")
-                      (concat lib-dir "domterm.jar")
-                      (concat lib-dir "jline.jar"))
-                   nil))
-               (list geiser-kawa-kawa-geiser-jar-path))))
+  (let ((jars
+         (append
+          (if (and
+               (not geiser-kawa-use-kawa-version-included-in-kawa-geiser)
+               (executable-find geiser-kawa-binary))
+              (let ((lib-dir (expand-file-name
+                              "../lib/"
+                              (file-name-directory
+                               (executable-find geiser-kawa-binary)))))
+                (if (file-directory-p lib-dir)
+                    (list
+                     (concat lib-dir "kawa.jar")
+                     (concat lib-dir "servlet.jar")
+                     (concat lib-dir "domterm.jar")
+                     (concat lib-dir "jline.jar"))
+                  nil))
+            nil)
+          (list geiser-kawa-kawa-geiser-jar-path))))
     (mapconcat #'identity jars ":")))
 
 (defvar geiser-kawa--arglist
