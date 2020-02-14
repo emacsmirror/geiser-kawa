@@ -36,14 +36,16 @@ kawa- and java-specific:
 
 ** Try geiser-kawa without modifying your emacs configuration
 
-1. Get Emacs, Cask, Maven and optionally Kawa and make them available through your $PATH
-     - the reason Kawa is optional is that =quickstart.el= calls =mvn package= (wrapped by =geiser-kawa-compile-java-dependencies=), which produces a jar that includes the compiled [[https://gitlab.com/groups/kashell/][Kawa's master branch]]
+1. Get Emacs, Cask, Maven and make them available through your $PATH
+     - Kawa is optional, but if you make the =kawa= executable available in your PATH you can use it too
 2. Clone this repository
 3. cd into the cloned dir
 4. Tell cask to install emacs dependencies with:
   : cask install
-5. Pull [[http://gitlab.com/spellcard199/kawa-geiser][kawa-geiser]] maven dependencies, compile them and start geiser-kawa's scratch buffer and repl with:
+5. Pull [[http://gitlab.com/spellcard199/kawa-geiser][kawa-geiser]] maven dependencies (the first time takes ~1 minute), compile them and start geiser-kawa's scratch buffer and repl with:
   : cask emacs -Q --load quickstart.el
+
+The reason Kawa is optional is that =quickstart.el= calls =mvn package= (wrapped by =geiser-kawa-compile-java-dependencies=), which produces a jar that includes the compiled [[https://gitlab.com/groups/kashell/][Kawa's master branch]]
 
 ** Cask issue with geiser
 
