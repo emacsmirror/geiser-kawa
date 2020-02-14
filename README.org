@@ -1,0 +1,8 @@
+* geiser-kawa-java
+** Project description
+
+geiser-kawa-java is the emacs side of a geiser-kawa implementation that uses [[https://gitlab.com/spellcard199/kawa-geiser][kawa-geiser]] for its Kawa side.
+
+** Project status
+
+Work in progress.
