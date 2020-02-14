@@ -4,9 +4,62 @@
 
 geiser-kawa-java is the emacs side of a geiser-kawa implementation that uses [[https://gitlab.com/spellcard199/kawa-geiser][kawa-geiser]] for its Kawa side.
 
-** Project status
+** Supported features
 
-Work in progress.
+- eval
+- load-file
+- completions
+- module-completions (very fragile atm)
+- autodoc:
+    - for scheme procedures
+    - for java methods
+
+** Unsupported features
+
+geiser-related:
+- macroexpand
+- find-file
+- symbol-location
+- module-location
+- symbol-documentation
+- module-exports
+- callers
+- callees
+- generic-methods
+- (TODO) manual lookup: should work for both formats:
+    - info: using emacs' Info-mode
+    - epub: using emacs' eww browser
+
+kawa- and java-specific:
+- completion for java methods
+- completion for java classes
+
+** Try geiser-kawa without modifying your emacs configuration
+
+1. Get Emacs, Cask, Maven and optionally Kawa and make them available through your $PATH
+     - the reason Kawa is optional is that =quickstart.el= calls =mvn package= (wrapped by =geiser-kawa-compile-java-dependencies=), which produces a jar that includes the compiled [[https://gitlab.com/groups/kashell/][Kawa's master branch]]
+2. Clone this repository
+3. cd into the cloned dir
+4. Tell cask to install emacs dependencies with:
+  : cask install
+5. Pull [[http://gitlab.com/spellcard199/kawa-geiser][kawa-geiser]] maven dependencies, compile them and start geiser-kawa's scratch buffer and repl with:
+  : cask emacs -Q --load quickstart.el
+
+** Cask issue with geiser
+
+If you use geiser as a dependency in a Cask project, Cask eagerly expands the =define-geiser-implementation= macro with =load-file-name= having the wrong value. The result is that geiser implementations in geiser do not work when geiser is managed as a dependency by Cask.
+
+Link to the issue I've opened in Cask: https://github.com/cask/cask/issues/472.
+
+As a (temporary?) workaround, geiser-kawa.el quotes =define-geiser-implementation= and wraps it an =eval= form, and that avoids:
+1. macro expansion to happen during cask-cli.el execution
+2. =load-file-name= having the wrong value of =<path-to-cask-cli.el>= instead of =<path-to-geiser-impl.el>=
+As a side effect, using =(require 'geiser-kawa)= instead of =(require geiser)= also fixes the problem for the other implementations, but for this I don't understand why.
+
+To summarize:
+1. geiser-kawa depends on geiser
+2. geiser as a dependency does not work with Cask (or vice-versa)
+3. If in the emacs instance started with =cask emacs= you use =(require 'geiser-kawa)= instead of =(require 'geiser)=, geiser-kawa.el chain-requires geiser and (for some reason I don't understand) other geiser implementations start working
 
 ** Difference from [[https://gitlab.com/spellcard199/geiser-kawa-scheme][geiser-kawa-scheme]]
 
