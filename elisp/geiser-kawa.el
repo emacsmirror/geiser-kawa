@@ -73,8 +73,9 @@
 ;; End of adaptations for making this package separate from geiser
 
 
-;; Compile the included "kawa-geiser" maven project into a fat jar
-(defun geiser-kawa-compile-java-dependencies()
+;; Download, compile and package "kawa-geiser" and its recursive
+;; dependencies into a fat jar.
+(defun geiser-kawa-mvn-package-java-deps()
   (interactive)
   (let ((default-directory geiser-kawa-dir))
     (compile "mvn package")))

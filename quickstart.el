@@ -17,4 +17,4 @@
   (remove-hook 'compilation-finish-functions #'run-kawa-after-compilation-finishes))
 
 (add-hook 'compilation-finish-functions #'run-kawa-after-compilation-finishes)
-(geiser-kawa-compile-java-dependencies)
+(geiser-kawa-mvn-package-java-deps)
