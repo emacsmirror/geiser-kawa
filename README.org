@@ -51,9 +51,9 @@ Only versions of Kawa > 3.1 are supported, mostly due to the fact that before th
 5. Pull [[http://gitlab.com/spellcard199/kawa-geiser][kawa-geiser]] maven dependencies (the first time takes ~1 minute), compile them and start geiser-kawa's scratch buffer and repl with:
   : cask emacs -Q --load quickstart.el
 
-The reason you don't need Kawa to try geiser-kawa is that =quickstart.el=:
-1. calls =mvn package= (wrapped by =geiser-kawa-compile-java-dependencies=), which produces a jar that includes the compiled [[https://gitlab.com/groups/kashell/][Kawa's master branch]]
-2. sets the variable =geiser-kawa-use-kawa-version-included-in-kawa-geiser= to =t=, to avoid issues with [[85b51f74-b1b2-4863-a888-0b11580321f3][older kawa versions]]
+The reason you don't need Kawa to try geiser-kawa is that =quickstart.el= uses the compiled [[https://gitlab.com/groups/kashell/][Kawa's master branch]] that is one of [[http://gitlab.com/spellcard199/kawa-geiser][kawa-geiser]]'s dependencies. To do so =quickstart.el=:
+1. calls =mvn package= (wrapped by =geiser-kawa-compile-java-dependencies=), which produces a jar that includes all [[http://gitlab.com/spellcard199/kawa-geiser][kawa-geiser]]'s dependencies
+2. sets the variable =geiser-kawa-use-kawa-version-included-in-kawa-geiser= to =t=
 
 ** Cask issue with geiser
 
