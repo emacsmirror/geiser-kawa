@@ -55,7 +55,7 @@
         <dependency>
             <groupId>com.gitlab.spellcard199</groupId>
             <artifactId>kawa-geiser</artifactId>
-            <version>f47df5ea22503b0eb4d83bc3be6066d9edb3cd18</version>
+            <version>3e7d104a58457e9710f57b1a9b79ea8b48467b5c</version>
         </dependency>
     </dependencies>
 

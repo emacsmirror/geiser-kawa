@@ -1,7 +1,7 @@
 ;;; geiser-kawa.el --- geiser support for Kawa scheme -*- lexical-binding:t -*-
 
 ;; Copyright (C) 2018 Mathieu Lirzin <mthl@gnu.org>
-;; Copyright (C) 2019 spellcard199 <spellcard199@protonmail.com>
+;; Copyright (C) 2019, 2020 spellcard199 <spellcard199@protonmail.com>
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the Modified BSD License. You should
@@ -35,6 +35,8 @@
 (require 'compile)
 (require 'info-look)
 (require 'cl)
+
+(require 'geiser-kawa-complete-java)
 
 ;;; Code:
 

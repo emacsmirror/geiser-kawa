@@ -4,36 +4,6 @@
 
 geiser-kawa-java is the emacs side of a geiser-kawa implementation that uses [[https://gitlab.com/spellcard199/kawa-geiser][kawa-geiser]] for its Kawa side.
 
-** Supported features
-
-- eval
-- load-file
-- completions
-- module-completions (very fragile atm)
-- autodoc:
-    - for scheme procedures
-    - for java methods
-
-** Unsupported features
-
-geiser-related:
-- macroexpand
-- find-file
-- symbol-location
-- module-location
-- symbol-documentation
-- module-exports
-- callers
-- callees
-- generic-methods
-- (TODO) manual lookup: should work for both formats:
-    - info: using emacs' Info-mode
-    - epub: using emacs' eww browser
-
-kawa- and java-specific:
-- completion for java methods
-- completion for java classes
-
 ** Supported Kawa versions
 :PROPERTIES:
 :CUSTOM_ID:       85b51f74-b1b2-4863-a888-0b11580321f3
@@ -52,6 +22,63 @@ Only versions of Kawa > 3.1 are supported, mostly due to the fact that before th
   : cask emacs -Q --load quickstart.el
 
 The reason you don't need Kawa to try geiser-kawa is that =quickstart.el= uses the compiled [[https://gitlab.com/groups/kashell/][Kawa's master branch]] that is one of [[http://gitlab.com/spellcard199/kawa-geiser][kawa-geiser]]'s dependencies. To do so =quickstart.el= calls =mvn package= (wrapped by =geiser-kawa-compile-java-dependencies=), which produces a jar that includes all [[http://gitlab.com/spellcard199/kawa-geiser][kawa-geiser]]'s dependencies.
+
+** Supported features
+
+- geiser-related:
+    - eval
+    - load-file
+    - completions
+    - module-completions (very fragile atm)
+    - autodoc:
+        - for scheme procedures
+        - for java methods
+    - manual lookup:
+        - remember to set variable =geiser-kawa-manual-path=
+        - should work for both formats:
+            - info: using emacs' Info-mode
+            - epub: using emacs' eww browser
+- kawa- and java-specific:
+    - completion for java classes' fields and methods accessed through colon-notation: don't expect java-grade reliability
+
+*** About completion for java classes' fields and methods
+
+The main interactive elisp function is =geiser-kawa-complete-java-fom-at-point=. It's not bound to a key by default.
+
+For this to work you have to:
+- use Kawa's type annotations: rememver that the Kawa compiler mostly trusts you and can't actually check
+- avoid syntax errors (e.g. unbalanced parentheses, wrong number of children sexps inside a form, etc...)
+
+How it works:
+1. Code sent is:
+     - from either:
+         - =(geiser-syntax--pop-to-top)=, if non-nil
+         - =(line-beginning-position)=, if =(geiser-syntax--pop-to-top)= is =nil=
+     - to either:
+         - end of sexp beginning at toplevel, if =(geiser-syntax--pop-to-top)= is non-nil
+         - =(line-end-position)=, if =(geiser-syntax--pop-to-top)= is =nil=
+2. Kawa code and cursor point inside the code are sent to [[https://gitlab.com/spellcard199/kawa-geiser][kawa-geiser]], which uses [[https://gitlab.com/spellcard199/kawa-devutil][kawa-devutil]] for actual functionality
+3. An arbitrary symbol is added at cursor point, so it can be found again in the AST
+4. Code is compiled into Kawa's AST but not evaluated
+5. Various AST "matchers" (functions that check if a certain pattern is found) are tried in order until the first matcher that matches
+     - "Matcher" functions also try to recognize the Class of the object of interest inside the AST
+     - If no matchers match, result is empty data
+
+** Unsupported features
+
+geiser-related:
+- macroexpand
+- find-file
+- symbol-location
+- module-location
+- symbol-documentation
+- module-exports
+- callers
+- callees
+- generic-methods
+
+kawa- and java-specific:
+- completion for java package names and class names
 
 ** Cask issue with geiser
 
