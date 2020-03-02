@@ -1,8 +1,8 @@
 #+STARTUP: content
-* geiser-kawa-java
+* geiser-kawa
 ** Project description
 
-geiser-kawa-java is the emacs side of a geiser-kawa implementation that uses [[https://gitlab.com/spellcard199/kawa-geiser][kawa-geiser]] for its Kawa side.
+geiser-kawa is the emacs side of a geiser-kawa implementation that uses [[https://gitlab.com/spellcard199/kawa-geiser][kawa-geiser]] for its Kawa side.
 
 ** Supported Kawa versions
 :PROPERTIES:
@@ -49,20 +49,19 @@ For this to work you have to:
 - use Kawa's type annotations: rememver that the Kawa compiler mostly trusts you and can't actually check
 - avoid syntax errors (e.g. unbalanced parentheses, wrong number of children sexps inside a form, etc...)
 
-How it works:
-1. Code sent is:
+How it works (the region getting part is quite rudimentray):
+1. A region of the current buffer and cursor point inside it are sent to [[https://gitlab.com/spellcard199/kawa-geiser][kawa-geiser]], which uses [[https://gitlab.com/spellcard199/kawa-devutil][kawa-devutil]] for actual functionality. The region of the buffer goes:
      - from either:
          - =(geiser-syntax--pop-to-top)=, if non-nil
          - =(line-beginning-position)=, if =(geiser-syntax--pop-to-top)= is =nil=
      - to either:
          - end of sexp beginning at toplevel, if =(geiser-syntax--pop-to-top)= is non-nil
          - =(line-end-position)=, if =(geiser-syntax--pop-to-top)= is =nil=
-2. Kawa code and cursor point inside the code are sent to [[https://gitlab.com/spellcard199/kawa-geiser][kawa-geiser]], which uses [[https://gitlab.com/spellcard199/kawa-devutil][kawa-devutil]] for actual functionality
-3. An arbitrary symbol is added at cursor point, so it can be found again in the AST
-4. Code is compiled into Kawa's AST but not evaluated
-5. Various AST "matchers" (functions that check if a certain pattern is found) are tried in order until the first matcher that matches
-     - "Matcher" functions also try to recognize the Class of the object of interest inside the AST
-     - If no matchers match, result is empty data
+2. An arbitrary symbol is added at cursor point, so it can be found again in the AST
+3. Code is compiled into Kawa's AST, but not evaluated
+4. Various AST "matchers" (functions that check if a certain pattern is found) are tried in order until either:
+     - one of them matches: the matcher function itself then also has to tell which class we are completing for
+     - none are left: empty data
 
 ** Unsupported features
 
@@ -80,6 +79,33 @@ geiser-related:
 kawa- and java-specific:
 - completion for java package names and class names
 
+** Difference from [[https://gitlab.com/spellcard199/geiser-kawa-scheme][geiser-kawa-scheme]]
+
+- The Kawa side of geiser-kawa uses [[https://gitlab.com/spellcard199/kawa-geiser][kawa-geiser]], which is written using Kawa's Java API.
+- The Kawa side of geiser-kawa-scheme is written directly in Kawa Scheme.
+- I'm going to add more features to geiser-kawa but I probably won't port them to geiser-kawa-scheme.
+
+Reasons for rewriting and translating the old geiser-kawa from Kawa Scheme to Java:
+- Easier to add as a scripting language in Java projects: just add the jitpack repo and the kawa-geiser dependency (see pom.xml as an example)
+- Easier to inculde external java libraries via maven central for additional functionalities (e.g. [[https://github.com/classgraph/classgraph][classgraph]])
+- Tooling for Java is excellent, tooling for Kawa is poor
+- Fully static type checking: probably it's because I'm bad at programming, but it helps me a lot
+- Possibility to share code between kawa-devutil and Kawa's Language Server
+- The old geiser-kawa's scheme implementation logic has been split in 2 projects:
+    - [[https://www.gitlab.com/spellcard199/kawa-devutil][kawa-devutil]]: functions that take care of getting data and general functionalities (e.g. eval capturing output)
+    - kawa-geiser:
+        - it's the maven project included with this project, made up by the file =pom.xml= and the directory =src=
+        - gets data and features through kawa-devutil and wraps the result in the geiser protocol
+
+The fact that kawa-devutil is now a project separated from geiser means that it may also be used to avoid re-writing the data-getting logic if one wanted to implement a protocol for a tool other than geiser (e.g. nrepl, jupyter, swank/slime).
+
+geiser-kawa VS geiser-kawa-scheme - recap table:
+
+|                                | geiser-kawa     | geiser-kawa-scheme |
+|--------------------------------+-----------------+--------------------|
+| Kawa side written with         | Kawa's Java API | Kawa Scheme        |
+| I'm going to add more features | Probably yes    | Probably not       |
+
 ** Cask issue with geiser
 
 If you use geiser as a dependency in a Cask project, Cask eagerly expands the =define-geiser-implementation= macro with =load-file-name= having the wrong value. The result is that geiser implementations in geiser do not work when geiser is managed as a dependency by Cask.
@@ -95,16 +121,3 @@ To summarize:
 1. geiser-kawa depends on geiser
 2. geiser as a dependency does not work with Cask (or vice-versa)
 3. If in the emacs instance started with =cask emacs= you use =(require 'geiser-kawa)= instead of =(require 'geiser)=, geiser-kawa.el chain-requires geiser and (for some reason I don't understand) other geiser implementations start working
-
-** Difference from [[https://gitlab.com/spellcard199/geiser-kawa-scheme][geiser-kawa-scheme]]
-
-- The Kawa side of geiser-kawa-java uses [[https://gitlab.com/spellcard199/kawa-geiser][kawa-geiser]], which is written using Kawa's Java API.
-- The Kawa side of geiser-kawa-scheme is written directly in Kawa Scheme.
-- I'm going to add more features to geiser-kawa-java but I probably won't port them to geiser-kawa-scheme.
-
-geiser-kawa-java VS geiser-kawa-scheme - recap table:
-
-|                                | geiser-kawa-java | geiser-kawa-scheme |
-|--------------------------------+------------------+--------------------|
-| Kawa side written with         | Kawa's Java API  | Kawa Scheme        |
-| I'm going to add more features | Probably yes     | Probably not       |
