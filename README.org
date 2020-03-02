@@ -6,7 +6,7 @@
 
 It has 2 parts:
 - =geiser-kawa=: elisp package inside the =elisp= directory that gives the name to the whole project
-- =kawa-geiser=: maven project written using Kawa's Java API that adds the functions that geiser-kawa calls to get the data it needs to a Kawa Scheme REPL
+- =kawa-geiser=: maven project written using Kawa's Java API that adds functions called by geiser-kawa to a Kawa Scheme REPL
 
 ** Supported Kawa versions
 :PROPERTIES:
