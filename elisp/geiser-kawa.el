@@ -80,7 +80,7 @@
 (defun geiser-kawa-mvn-package-java-deps()
   (interactive)
   (let ((default-directory geiser-kawa-dir))
-    (compile "mvn package")))
+    (compile "./mvnw package")))
 
 ;; Using `mvn package' from the pom.xml's directory should produce a
 ;; jar containing all the java dependencies.
