@@ -86,7 +86,7 @@
 ;; jar containing all the java dependencies.
 (defcustom geiser-kawa-kawa-geiser-jar-path
   (expand-file-name
-   "./target/kawa-geiser-wrapper-0.1-SNAPSHOT-jar-with-dependencies.jar"
+   "./target/kawa-geiser-0.1-SNAPSHOT-jar-with-dependencies.jar"
    geiser-kawa-dir)
   "Path to the kawa-geiser fat jar."
   :type 'string
