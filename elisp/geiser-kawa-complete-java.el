@@ -166,7 +166,7 @@
                       code-str cursor-index))
          (user-choice (geiser-kawa-complete-java--user-choice-dispatch
                        compl-data)))
-    (when (word-at-point)
+    (when (thing-at-point 'word)
       (if (looking-back ":" (- (point) 2))
           (kill-word 1)
         (kill-word -1)))
