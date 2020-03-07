@@ -43,50 +43,80 @@
                 (list (string-trim
                        (car (split-string (geiser-eval--retort-output
                                            geiser-answer)
-                             "\t")))))
+                                          "\t")))))
       (geiser-eval--retort-result geiser-answer))))
 
-(defun geiser-kawa-complete-java--user-choice
-    (compl-for-class modifiers
-     field-or-method completions
-     before-cursor)
-  "`for-class' is the class that owns the field or methods in
-`completions'.
-`field-or-method' should be either 'field or 'method, but it's not
-checked.
-`completions' is a list of names (strings) that the user can pick
-from."
-  (completing-read
-   (concat "(" (string-join modifiers " ") " " field-or-method ") "
-           compl-for-class "."
-           ;; "- Exp  : " compl-for-expr "\n"
-           ;; ": "
-           )
-   completions
-   nil
-   nil
-   before-cursor))
-
-(defun geiser-kawa-complete-java--user-choice-data
-    (compl-data)
+(defun geiser-kawa-complete-java--user-choice--field-or-method
+    (fm-compl-data)
+  ;; fm stands for field or method.
   (let ((compl-for-class
-         (cadr (assoc "compl-for-class" compl-data)))
+         (cadr (assoc "compl-for-class" fm-compl-data)))
         (modifiers
-         (cadr (assoc "modifiers" compl-data)))
+         (cadr (assoc "modifiers" fm-compl-data)))
         (field-or-method
-         (cadr (assoc "field-or-method" compl-data)))
-        (completions
-         (cadr (assoc "completions" compl-data)))
-        ;; unused
+         (cadr (assoc "field-or-method-or-package" fm-compl-data)))
+        (names
+         (cadr (assoc "names" fm-compl-data)))
         (before-cursor
-         (cadr (assoc "before-cursor" compl-data)))
+         (cadr (assoc "before-cursor" fm-compl-data)))
         ;; unused
         (after-cursor
-         (cadr (assoc "after-cursor" compl-data))))
-    (geiser-kawa-complete-java--user-choice
-     compl-for-class modifiers
-     field-or-method completions
+         (cadr (assoc "after-cursor" fm-compl-data))))
+
+    (completing-read
+     (concat "(" (string-join modifiers " ") " " field-or-method ") "
+             compl-for-class "."
+             ;; "- Exp  : " compl-for-expr "\n"
+             ;; ": "
+             )
+     names
+     nil
+     nil
      before-cursor)))
+
+(defun geiser-kawa-complete-java--user-choice--package
+    (package-compl-data)
+  (let ((field-or-method-or-package
+         (cadr (assoc "field-or-method-or-package" package-compl-data)))
+        (package-name
+         (cadr (assoc "package-name" package-compl-data)))
+        (names
+         (cadr (assoc "names" package-compl-data)))
+        (before-cursor
+         (cadr (assoc "before-cursor" package-compl-data)))
+        ;; unused
+        (after-cursor
+         (cadr (assoc "after-cursor" package-compl-data))))
+    (completing-read
+     (concat "(" field-or-method-or-package ") "
+             (if (string-equal "" package-name)
+                 "(root.)"
+               (concat package-name ".")))
+     (mapcar (lambda (name)
+               (string-remove-prefix
+                "." (string-remove-prefix package-name name)))
+             names)
+     nil
+     nil
+     (string-remove-prefix
+      "." (string-remove-prefix package-name before-cursor))
+     )))
+
+(defun geiser-kawa-complete-java--user-choice-dispatch
+    (compl-data)
+  (let ((compl-for (cadr (assoc "field-or-method-or-package"
+                                compl-data))))
+    (cond ((equal compl-for "FIELD")
+           (geiser-kawa-complete-java--user-choice--field-or-method
+            compl-data))
+          ((equal compl-for "METHOD")
+           (geiser-kawa-complete-java--user-choice--field-or-method
+            compl-data))
+          ((equal compl-for "PACKAGE")
+           (geiser-kawa-complete-java--user-choice--package
+            compl-data))
+          (t (error (format "[Unexpected condition] compl-for: %s"
+                            (prin1-to-string compl-for)))))))
 
 (defun geiser-kawa-complete-java--code-point-from-toplevel ()
   (let* (reg-beg
@@ -119,24 +149,24 @@ from."
      `("code-str"     . ,code-str)
      `("cursor-index" . ,cursor-index))))
 
-(defun geiser-kawa-complete-java-fom-at-point ()
+(defun geiser-kawa-complete-java-fmp-at-point ()
   (interactive)
-  "Complete java field or method at point"
+  "Complete java field or method or package (fmp) at point"
 
   (let* ((code-and-point-data
-         (geiser-kawa-complete-java--code-point-from-toplevel))
+          (geiser-kawa-complete-java--code-point-from-toplevel))
          (code-str     (cdr (assoc "code-str"
                                    code-and-point-data)))
          (cursor-index (cdr (assoc "cursor-index"
                                    code-and-point-data)))
          (compl-data (geiser-kawa-complete-java--get-data
                       code-str cursor-index))
-         (user-choice (geiser-kawa-complete-java--user-choice-data
+         (user-choice (geiser-kawa-complete-java--user-choice-dispatch
                        compl-data)))
     (when (word-at-point)
       (if (looking-back ":" (- (point) 2))
           (kill-word 1)
-          (kill-word -1)))
+        (kill-word -1)))
     (insert user-choice)
     ;; (when (not (equal (word-at-point) user-choice))
     ;;   (kill-word 1)

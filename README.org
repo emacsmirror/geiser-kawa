@@ -31,7 +31,8 @@ Only versions of Kawa > 3.1 are supported, mostly due to the fact that before th
             - info: using emacs' Info-mode
             - epub: using emacs' eww browser
 - kawa- and java-specific:
-    - completion for java classes' fields and methods accessed through colon-notation: don't expect java-grade reliability
+    - completion for java's field and method names accessed through colon-notation (don't expect java-grade reliability)
+    - completion for java's package and class names
 
 ** Unsupported features
 
@@ -45,9 +46,6 @@ geiser-related:
 - callers
 - callees
 - generic-methods
-
-kawa- and java-specific:
-- completion for java package names and class names
 
 ** Try geiser-kawa without modifying your emacs configuration
 
@@ -66,11 +64,11 @@ To try geiser-kawa you need neither Maven nor Kawa:
 - =mvnw= ([[https://github.com/takari/maven-wrapper][maven-wrapper]]) takes care of downloading a project-specific Maven version
 - kawa-geiser has [[https://gitlab.com/groups/kashell/][Kawa's master branch]] as one of its dependencies. When =quickstart.el= calls =./mvnw package= (wrapped by =geiser-kawa-compile-java-dependencies=), it produces a jar that includes kawa-geiser and all its dependencies, including Kawa itself.
 
-** About completion for java classes' fields and methods
+** About completion for java's fields, methods and packages (that's what =fmp= stands for in the function names)
 
-The whole project is in a persistent "experimental" state, but this part even more so.
+The whole project is in a persistent "experimental" state, but this part even more so because it's based on assumptions I'm not sure about.
 
-The main interactive elisp function is =geiser-kawa-complete-java-fom-at-point=. It's not bound to a key by default.
+The main interactive elisp function is =geiser-kawa-complete-java-fmp-at-point=. It's not bound to a key by default.
 
 For this to work you have to:
 - use Kawa's type annotations: rememver that the Kawa compiler mostly trusts you and can't actually check

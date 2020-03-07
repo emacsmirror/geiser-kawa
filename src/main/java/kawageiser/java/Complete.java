@@ -8,22 +8,16 @@ package kawageiser.java;
 import gnu.expr.Language;
 import gnu.lists.IString;
 import gnu.lists.LList;
-import gnu.lists.Pair;
 import gnu.mapping.Environment;
-import gnu.mapping.Procedure1or2;
-import gnu.mapping.Procedure3;
 import gnu.mapping.Procedure4;
 import gnu.math.IntNum;
 import kawadevutil.complete.*;
 
-import java.io.File;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Complete extends Procedure4 {
 
@@ -64,36 +58,57 @@ public class Complete extends Procedure4 {
             return LList.Empty;
         } else {
             CompletionDataForJava complData = complDataMaybe.get();
-            if (complData.getClass().equals(CompletionDataForJavaField.class)) {
-                CompletionDataForJavaField complDataForField = (CompletionDataForJavaField) complData;
-            } else if (complData.getClass().equals(CompletionDataForJavaMethod.class)) {
-                CompletionDataForJavaMethod complDataForMethod = (CompletionDataForJavaMethod) complData;
+            LList res = null;
+            if (complData.getClass().equals(CompletionDataForJavaField.class)
+                    || complData.getClass().equals(CompletionDataForJavaMethod.class)) {
+                res = toLList((CompletionDataForJavaFOM) complData);
+            } else if (complData.getClass().equals(CompletionDataForJavaPackage.class)) {
+                res = toLList((CompletionDataForJavaPackage) complData);
             } else {
                 throw new Error("Bug spotted.");
             }
-
-            String completionsForClass = complData.getForClass().getName();
-            CompletionDataForJava.FieldOrMethod fieldOrMethod = complData.getFieldOrMethod();
-            List<String> names = (List<String>) complData.getNames().stream().distinct().collect(Collectors.toList());
-            String beforeCursor = complData.getCursorMatcher().getCursorMatch().getBeforeCursor();
-            String afterCursor = complData.getCursorMatcher().getCursorMatch().getAfterCursor();
-            // I don't know why it says "unchecked call" when using complData.getRequiredModifiers().stream()
-            ArrayList<String> modifiers = new ArrayList<>();
-            for (Object modifier : complData.getRequiredModifiers()) {
-                modifiers.add(modifier.toString());
-            }
-
-            java.util.List<LList> res = Arrays.asList(
-                    LList.list2("compl-for-class", completionsForClass),
-                    LList.list2("modifiers", LList.makeList(modifiers)),
-                    LList.list2("field-or-method", fieldOrMethod.toString()),
-                    LList.list2("completions", LList.makeList(names)),
-                    LList.list2("before-cursor", beforeCursor),
-                    LList.list2("after-cursor", afterCursor)
-            );
-            LList resLList = LList.makeList(res);
-            return gnu.kawa.functions.Format.format("~S", resLList);
+            return gnu.kawa.functions.Format.format("~S", res);
         }
+    }
+
+    private static LList toLList(CompletionDataForJavaFOM complData) {
+        String completionsForClass = complData.getForClass().getName();
+        // I don't know why it says "unchecked call" when using complData.getRequiredModifiers().stream()
+        ArrayList<String> modifiers = new ArrayList<>();
+        for (Object modifier : complData.getRequiredModifiers()) {
+            modifiers.add(modifier.toString());
+        }
+
+        ArrayList<LList> res = new ArrayList<>(getCommonData(complData));
+        res.addAll(Arrays.asList(
+                LList.list2("compl-for-class", completionsForClass),
+                LList.list2("modifiers", LList.makeList(modifiers))
+        ));
+        return LList.makeList(res);
+
+    }
+
+    private static LList toLList(CompletionDataForJavaPackage complData) {
+        ArrayList<LList> res = new ArrayList<>(getCommonData(complData));
+        res.addAll(Arrays.asList(
+                LList.list2("package-name", complData.getPinfo().getName())
+        ));
+        return LList.makeList(res);
+    }
+
+    private static List<LList> getCommonData(CompletionDataForJava complData) {
+        CompletionDataForJava.FieldOrMethodOrPackage fieldOrMethod = complData.getFieldOrMethodOrPackage();
+        List<String> names = (List<String>) complData.getNames().stream().distinct().collect(Collectors.toList());
+        String beforeCursor = complData.getCursorMatcher().getCursorMatch().getBeforeCursor();
+        String afterCursor = complData.getCursorMatcher().getCursorMatch().getAfterCursor();
+
+        java.util.List<LList> res = Arrays.asList(
+                LList.list2("field-or-method-or-package", fieldOrMethod.toString()),
+                LList.list2("names", LList.makeList(names)),
+                LList.list2("before-cursor", beforeCursor),
+                LList.list2("after-cursor", afterCursor)
+        );
+        return res;
     }
 
 }
