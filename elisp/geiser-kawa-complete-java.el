@@ -115,6 +115,9 @@
           ((equal compl-for "PACKAGE")
            (geiser-kawa-complete-java--user-choice--package
             compl-data))
+	  ((equal compl-for nil)
+	   (message "No completions found.")
+	   "")
           (t (error (format "[Unexpected condition] compl-for: %s"
                             (prin1-to-string compl-for)))))))
 
