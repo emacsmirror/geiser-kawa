@@ -71,7 +71,7 @@ The whole project is in a persistent "experimental" state, but this part even mo
 The main interactive elisp function is =geiser-kawa-complete-java-fmp-at-point=. It's not bound to a key by default.
 
 For this to work you have to:
-- use Kawa's type annotations: rememver that the Kawa compiler mostly trusts you and can't actually check
+- use Kawa's type annotations: rememver that the Kawa compiler mostly trusts you
 - avoid syntax errors (e.g. unbalanced parentheses, wrong number of children sexps inside a form, etc...)
 
 How it works (the region getting part is quite rudimentray):
@@ -114,7 +114,7 @@ geiser-kawa VS geiser-kawa-scheme - recap table:
 
 If you use geiser as a dependency in a Cask project, Cask eagerly expands the =define-geiser-implementation= macro with =load-file-name= having the wrong value. The result is that geiser implementations in geiser do not work when geiser is managed as a dependency by Cask.
 
-Link to the issue I've opened in Cask: https://github.com/cask/cask/issues/472.
+Link to the issue I've opened in Cask: [[https://github.com/cask/cask/issues/472]].
 
 As a (temporary?) workaround, geiser-kawa.el quotes =define-geiser-implementation= and wraps it an =eval= form, and that avoids:
 1. macro expansion to happen during cask-cli.el execution
