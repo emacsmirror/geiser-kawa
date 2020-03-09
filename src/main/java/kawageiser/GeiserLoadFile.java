@@ -32,7 +32,7 @@ public class GeiserLoadFile extends Procedure1 {
     }
 
     public Object load(String filepath) {
-        return GeiserEval.eval(
+        return GeiserEval.evalForm(
                 Language.getDefaultLanguage().getEnvironment(),
                 LList.list2(load.load, filepath));
     }

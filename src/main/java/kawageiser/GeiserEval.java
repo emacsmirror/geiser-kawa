@@ -30,12 +30,21 @@ public class GeiserEval extends Procedure2 {
     @Override
     public String
     apply2(Object module, Object codeStr) {
-        // Today (2019-12-9) Kawa has still that issue when
-        // quoting (this) followed by a double colon. So, to avoid
-        // it altogether, geiser:eval default is to accept Strings
-        // instead of sexprs.
-        // You can still evaluate expressions instead of strings using
-        // the other GeiserEval:eval method explicitly.
+        // The reason this method takes a string instead of a quoted sexpr has been solved
+        // on 2019-12-19 in Kawa's master branch:
+        // https://gitlab.com/kashell/Kawa/-/commit/537e135c0101194702ebee53faf92b98a4ea8c6b
+        // When there is going to be a reason to change the current behavior of GeiserEval,
+        // geiser-kawa.el should also be changed to something like this:
+        // (case proc
+        //   ((eval compile)
+        //    (let* ((send-this
+        //            (format
+        //             "(geiser:eval (interaction-environment) '%s)"
+        //             cadr args))))
+        //      (print send-this)
+        //      send-this))
+        //
+
         String code;
         if (codeStr instanceof IString) {
             code = ((IString) codeStr).toString();
@@ -45,17 +54,17 @@ public class GeiserEval extends Procedure2 {
             throw new IllegalArgumentException(
                     "`codeStr' arg should be either a String or an IString");
         }
-        return eval((Environment) module, code);
+        return evalStr((Environment) module, code);
     }
 
     public static String
-    eval(Environment module, String codeStr) {
+    evalStr(Environment module, String codeStr) {
         EvalResultAndOutput resOutErr = Geiser.evaluator.evalCatchingOutErr(module, codeStr);
         return formatGeiserProtocol(evaluationDataToGeiserProtocol(resOutErr));
     }
 
     public static String
-    eval(Environment module, Object sexpr) {
+    evalForm(Environment module, Object sexpr) {
         EvalResultAndOutput resOutErr = Geiser.evaluator.evalCatchingOutErr(module, sexpr);
         return formatGeiserProtocol(evaluationDataToGeiserProtocol(resOutErr));
     }
