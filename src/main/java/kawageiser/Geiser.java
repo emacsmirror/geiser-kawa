@@ -28,5 +28,6 @@ public class Geiser implements Runnable {
         lang.defineFunction(new GeiserAutodoc("geiser:autodoc", lang));
         lang.defineFunction(new kawageiser.java.Complete("geiser:complete-java"));
         lang.defineFunction(new ManualEpubUnzipToTmpDir("geiser:manual-epub-unzip-to-tmp-dir"));
+        lang.defineFunction(new GeiserMacroexpand("geiser:macroexpand"));
     }
 }

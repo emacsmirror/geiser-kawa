@@ -362,8 +362,7 @@ Argument MOD is passed by geiser, but it's not used here."
  ;; https://github.com/cask/cask/issues/472 in projects that depend on
  ;; geiser-kawa.
  '(define-geiser-implementation kawa
-    (unsupported-procedures '(macroexpand
-                              find-file
+    (unsupported-procedures '(find-file
                               symbol-location
                               module-location
                               symbol-documentation

@@ -22,6 +22,7 @@ Only versions of Kawa > 3.1 are supported, mostly due to the fact that before th
     - load-file
     - completions
     - module-completions (very fragile atm)
+    - macroexpand
     - autodoc:
         - for scheme procedures
         - for java methods
@@ -36,16 +37,15 @@ Only versions of Kawa > 3.1 are supported, mostly due to the fact that before th
 
 ** Unsupported features
 
-geiser-related:
-- macroexpand
-- find-file
-- symbol-location
-- module-location
-- symbol-documentation
-- module-exports
-- callers
-- callees
-- generic-methods
+- geiser-related:
+    - find-file
+    - symbol-location
+    - module-location
+    - symbol-documentation
+    - module-exports
+    - callers
+    - callees
+    - generic-methods
 
 ** Try geiser-kawa without modifying your emacs configuration
 
