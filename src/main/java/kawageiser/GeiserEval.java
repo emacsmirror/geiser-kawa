@@ -18,10 +18,11 @@ import kawadevutil.redirect.RedirectedOutErr;
 
 public class GeiserEval extends Procedure2 {
     /*
-     *  Actual evaluation happens in kawadevtools.eval.Eval.
+     *  Actual evaluation happens in kawadevutil.eval.Eval.
      *  Here we are just sending arguments and converting our own
      *  types into the geiser protocol.
      */
+    public static kawadevutil.eval.Eval evaluator = new kawadevutil.eval.Eval();
 
     GeiserEval(String procName) {
         super(procName);
@@ -59,13 +60,13 @@ public class GeiserEval extends Procedure2 {
 
     public static String
     evalStr(Environment module, String codeStr) {
-        EvalResultAndOutput resOutErr = Geiser.evaluator.evalCatchingOutErr(module, codeStr);
+        EvalResultAndOutput resOutErr = evaluator.evalCatchingOutErr(module, codeStr);
         return formatGeiserProtocol(evaluationDataToGeiserProtocol(resOutErr));
     }
 
     public static String
     evalForm(Environment module, Object sexpr) {
-        EvalResultAndOutput resOutErr = Geiser.evaluator.evalCatchingOutErr(module, sexpr);
+        EvalResultAndOutput resOutErr = evaluator.evalCatchingOutErr(module, sexpr);
         return formatGeiserProtocol(evaluationDataToGeiserProtocol(resOutErr));
     }
 
@@ -85,7 +86,7 @@ public class GeiserEval extends Procedure2 {
                 : "";
         messages = (messages != null) ? messages : "";
         String stackTrace = (evalRes.getThrowed() != null)
-                ? Geiser.evaluator.formatStackTrace(evalRes.getThrowed())
+                ? evaluator.formatStackTrace(evalRes.getThrowed())
                 : "";
         String output = outErr.getOutAndErrInPrintOrder();
         // If we wanted, we could include stack traces directly in

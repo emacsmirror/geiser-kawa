@@ -19,11 +19,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class Complete extends Procedure4 {
+public class GeiserCompleteJava extends Procedure4 {
 
     public static boolean showTypes = true;
 
-    public Complete(String name) {
+    public GeiserCompleteJava(String name) {
         super(name);
     }
 
@@ -46,7 +46,8 @@ public class Complete extends Procedure4 {
             cursorIndexChecked = ((IntNum) cursorIndex).intValue();
         } else {
             throw new IllegalArgumentException(
-                    "`cursorIndex` must be either Integer or IntNum: " + cursorIndex.getClass().toString());
+                    "`cursorIndex` must be either Integer or IntNum: "
+                            + cursorIndex.getClass().toString());
         }
 
         // Get Data
@@ -65,7 +66,8 @@ public class Complete extends Procedure4 {
             } else if (complData.getClass().equals(CompletionDataForJavaPackage.class)) {
                 res = toLList((CompletionDataForJavaPackage) complData);
             } else {
-                throw new Error("Bug spotted.");
+                throw new Error("[BUG SPOTTED] `complData's class is one not expected: "
+                        + complData.getClass().toString());
             }
             return gnu.kawa.functions.Format.format("~S", res);
         }
