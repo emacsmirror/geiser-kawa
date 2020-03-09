@@ -9,7 +9,10 @@ import gnu.expr.CompiledProc;
 import gnu.expr.Language;
 import gnu.kawa.functions.Format;
 import gnu.lists.LList;
-import gnu.mapping.*;
+import gnu.mapping.Environment;
+import gnu.mapping.Procedure;
+import gnu.mapping.Procedure1or2;
+import gnu.mapping.Symbol;
 import kawadevutil.data.ParamData;
 import kawadevutil.data.ProcDataGeneric;
 import kawadevutil.data.ProcDataNonGeneric;
@@ -207,7 +210,12 @@ public class GeiserAutodoc extends Procedure1or2 {
             Object operator = null;
             boolean symExists = false;
             try {
-                operator = lang.eval(symId.toString());
+                // env.get(symId) works with the < procedure, while lang.eval(symId.toString())
+                // raises NullPointerException (maybe a bug?).
+                // On the other hand, env.get(symId) does not work with procedures defined
+                // from java with lang.defineFunction(), like the various geiser:...
+                // Since kawadevutil's eval works for both we are using that for now.
+                operator = GeiserEval.evaluator.eval(lang, env, symId).getResult();
                 symExists = true;  // If it didn't exist env.get(symId) would have raised UnboundLocationException
                 if (!Procedure.class.isAssignableFrom(operator.getClass())) {
                     // Not a procedure
