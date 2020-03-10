@@ -5,6 +5,7 @@
 
 package kawageiser;
 
+import gnu.expr.Language;
 import gnu.lists.LList;
 import gnu.mapping.Environment;
 import gnu.mapping.Symbol;
@@ -23,10 +24,10 @@ public class GeiserAutodocTest {
         Environment env = scheme.getEnvironment();
         Symbol displaySym = env.getSymbol("display");
         Symbol cdddrSym = env.getSymbol("cdddr");
+        Language saveLang = Language.setSaveCurrent(scheme);
         String autodocDisplay = GeiserAutodoc.autodoc(LList.list1(displaySym), env);
         String autodocCdddr = GeiserAutodoc.autodoc(LList.list1(cdddrSym), env);
-
-        // System.out.println(autodocDisplay);
+        Language.restoreCurrent(saveLang);
 
         assertTrue(autodocDisplay.startsWith("((\"display\""));
         assertTrue(autodocDisplay.contains(" (\"args\" "));
