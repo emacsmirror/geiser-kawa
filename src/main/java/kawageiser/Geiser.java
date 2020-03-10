@@ -32,16 +32,15 @@ public class Geiser implements Runnable {
 
         Language lang = Language.getDefaultLanguage();
 
-        // In a previous version definitions were like this:
+        // In a previous version, geiser's procedures definitions were like this:
         // lang.defineFunction(new GeiserEval("geiser:eval"));
-        // However, that meant you were forced to extend Procedure1, Procedure2, ...
-        // which can only have arguments of type Object and must be instanced to be used.
-        // This means that compared to static methods you don't have:
+        // That meant you had to extend Procedure1, Procedure2... which can only have
+        // arguments of type Object and must be instanced to be used.
+        // Not that symbols are bound to static methods we can have:
         // - parameter names in autodoc: I couldn't find a way to get parameter names for instance methods
-        // - parameter types in autodoc: because their types must be be Object
+        // - parameter types in autodoc: because their types can be other than Object
         // - type warnings: for the same reason of the previous point
-        // Another advantage with this new approach is we don't have to add all the boilerplate
-        // for checking argument types.
+        // - less boilerplate for checking argument types
         try {
             lang.defineFunction(
                     "geiser:eval",
