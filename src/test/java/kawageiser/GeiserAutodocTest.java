@@ -18,14 +18,13 @@ import static org.testng.Assert.*;
 public class GeiserAutodocTest {
 
     @Test
-    public void testApply2() {
+    public void testApply2() throws Throwable {
         Scheme scheme = new Scheme();
         Environment env = scheme.getEnvironment();
         Symbol displaySym = env.getSymbol("display");
         Symbol cdddrSym = env.getSymbol("cdddr");
-        GeiserAutodoc geiserAutodoc = new GeiserAutodoc("geiser-testing-autodoc", scheme);
-        String autodocDisplay = (String) geiserAutodoc.apply2(LList.list1(displaySym), env);
-        String autodocCdddr = (String) geiserAutodoc.apply2(LList.list1(cdddrSym), env);
+        String autodocDisplay = GeiserAutodoc.autodoc(LList.list1(displaySym), env);
+        String autodocCdddr = GeiserAutodoc.autodoc(LList.list1(cdddrSym), env);
 
         // System.out.println(autodocDisplay);
 
