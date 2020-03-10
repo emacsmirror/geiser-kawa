@@ -9,28 +9,20 @@ import gnu.expr.Language;
 import gnu.kawa.functions.Format;
 import gnu.kawa.slib.syntaxutils;
 import gnu.mapping.Environment;
-import gnu.mapping.Procedure1or2;
 
-public class GeiserMacroexpand extends Procedure1or2 {
+public class GeiserMacroexpand {
 
-    GeiserMacroexpand(String name) {
-        super(name);
+    public static String expand(Object form) throws Throwable {
+        return expand(form, true);
     }
 
-    @Override
-    public Object apply1(Object form) throws Throwable {
-        return apply2(form, false);
-    }
-
-    @Override
-    public Object apply2(Object form, Object all) throws Throwable {
-        // I think Kawa macro expansion can only expand to the whole tree, so:
-        // 1. There is no macroexpand-1
-        // 2. The `all' argument that geiser passes is ignored
+    public static String expand(Object form, boolean all) throws Throwable {
+        // `all' is ignored: geiser passes #t or #f depending on whether it needs
+        // expand-1 or expand-all, but Kawa's `expand' can only expand the whole tree.
         return expand(form, Language.getDefaultLanguage().getEnvironment());
     }
 
-    public Object expand(Object form, Environment env) throws Throwable {
+    public static String expand(Object form, Environment env) throws Throwable {
         // TODO: How do you invoke kawa procedures with keyword arguments from java?
         //  - ignoring env and using apply1, for now
         //  - an alternative would be to port gnu.kawa.slib.syntaxutils.expand from scheme to java (it's easy)
@@ -69,6 +61,6 @@ public class GeiserMacroexpand extends Procedure1or2 {
         // Double formatting so that double quotes around strings are not lost.
         return Format.format(
                 "~S",
-                Format.format("~S", expanded));
+                Format.format("~S", expanded)).toString();
     }
 }

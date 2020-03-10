@@ -11,42 +11,37 @@ import gnu.kawa.functions.Format;
 import gnu.lists.LList;
 import gnu.mapping.Environment;
 import gnu.mapping.Procedure;
-import gnu.mapping.Procedure1or2;
 import gnu.mapping.Symbol;
 import kawadevutil.data.ParamData;
 import kawadevutil.data.ProcDataGeneric;
 import kawadevutil.data.ProcDataNonGeneric;
+import kawadevutil.eval.EvalResult;
 import kawadevutil.kawa.GnuMappingLocation;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class GeiserAutodoc extends Procedure1or2 {
+public class GeiserAutodoc {
 
     public static boolean showTypes = true;
-    Language lang;
 
-    GeiserAutodoc(String name, Language lang) {
-        super(name);
-        this.lang = lang;
-    }
-
-    // TODO: find the "right" way to get modules for symbols.
-    // TODO: support for procedures defined in java, like `append'
-    // TODO: support for macros (possible?)
-    // TODO: support for getting parameter names for java instance
+    // TODO: Find the "right" way to get modules for symbols.
+    // TODO: Support for macros (possible?)
+    // TODO: Support for getting parameter names for java instance
     //       methods getMethods bytecode with ClassType (not so simple)
-    // TODO: support names with special characters, like |a[)|
+    // TODO: Support names with special characters, like |a[)|
+    //       Problem is that resulting name is without the || around
+    //       the name and since the name that emacs is different from
+    //       the one we are given back autodoc is not accepted as valid
     //       Maybe we can:
     //       1. keep a list of special chars
     //       2. when `id' contains one: surround with || (e.g. |id|)
-    // TODO: consider multiple ids:
+    // TODO: Consider multiple ids:
     //  - Examples: to get more add (message (format "(geiser:%s %s)" proc form))
     //              in the t clause of the geiser-kawa--geiser-procedure:
     //   - (display [cursor] -> (geiser:autodoc ’(display))
     //   - (display (symbol? (string->symbol [cursor] -> (geiser:autodoc ’(string->symbol symbol? display))
-
 
     // At the moment arguments are enclosed in double quotes. The
     // reason is that geiser's output is `read' by elisp, but java types
@@ -61,38 +56,32 @@ public class GeiserAutodoc extends Procedure1or2 {
     // return (new SymToAutodoc()).apply2(symId, env);
     // })
 
-    // @Override
-    public Object apply1(Object ids) {
-        return apply2(ids, Language.getDefaultLanguage().getEnvironment());
+    public static String autodoc(LList ids) {
+        Language language = Language.getDefaultLanguage();
+        return autodoc(ids, language, language.getEnvironment());
     }
 
-    // @Override
-    public Object apply2(Object ids, Object env) {
+    public static String autodoc(LList ids, Environment env) {
+        Language language = Language.getDefaultLanguage();
+        return autodoc(ids, language, env);
+    }
 
-        if (!LList.class.isAssignableFrom(ids.getClass())) {
-            throw new IllegalArgumentException(String.format(
-                    "GeiserAutodoc's 1st arg should be a gnu.lists.LList"));
-        }
-        if (!Environment.class.isAssignableFrom(env.getClass())) {
-            throw new IllegalArgumentException(String.format(
-                    "GeiserAutodoc's 2nd arg should be a gnu.mapping.Environment"));
-        }
+    public static String autodoc(LList ids, Language lang, Environment env) {
+        String formattedAutodoc = null;
         try {
             ArrayList<Object> autodocList = new ArrayList<>();
             for (Object symId : (LList) ids) {
                 AutodocDataForSymId autodocDataForSymId =
-                        new AutodocDataForSymId((Symbol) symId, (Environment) env, this.lang);
+                        new AutodocDataForSymId((Symbol) symId, env, lang);
                 autodocList.add(autodocDataForSymId.toLList());
             }
-            String formattedAutodoc =
-                    Format
-                            .format("~S", LList.makeList(autodocList))
-                            .toString();
-            return formattedAutodoc;
+            formattedAutodoc = Format
+                    .format("~S", LList.makeList(autodocList))
+                    .toString();
         } catch (Throwable throwable) {
             throwable.printStackTrace();
-            return throwable;
         }
+        return formattedAutodoc;
     }
 
     public static class OperatorArgListData {
@@ -129,7 +118,7 @@ public class GeiserAutodoc extends Procedure1or2 {
             } else if (!isOptionalParam && !showTypes) {
                 return formatParam(param, "~a");
             } else {
-                throw new Error("No worries, can't happen (2 booleans == 4 possibilities)." +
+                throw new Error("No worries, this clause can't happen (2 booleans == 4 possibilities)." +
                         "Just silencing the \"Missing return statement\" error.");
             }
         }
@@ -195,7 +184,7 @@ public class GeiserAutodoc extends Procedure1or2 {
     public static class AutodocDataForSymId {
         private boolean symExists;
         private Symbol symId;
-        private Object operator;
+        private Optional<Object> operatorMaybe;
         private Environment environment;
         private Optional<OperatorArgListData> operatorArgListMaybe;
         // TODO: fix type, write way to get it
@@ -206,33 +195,35 @@ public class GeiserAutodoc extends Procedure1or2 {
             this.symId = symId;
             this.environment = env;
 
+            Optional<Object> operatorMaybe = Optional.empty();
             Optional<OperatorArgListData> operatorArgListMaybe = Optional.empty();
-            Object operator = null;
-            boolean symExists = false;
             try {
-                // env.get(symId) works with the < procedure, while lang.eval(symId.toString())
-                // raises NullPointerException (maybe a bug?).
+                // env.get(symId) works with the < procedure, while
+                // lang.eval(symId.toString()) raises NullPointerException (maybe a bug?).
                 // On the other hand, env.get(symId) does not work with procedures defined
                 // from java with lang.defineFunction(), like the various geiser:...
                 // Since kawadevutil's eval works for both we are using that for now.
-                operator = GeiserEval.evaluator.eval(lang, env, symId).getResult();
-                symExists = true;  // If it didn't exist env.get(symId) would have raised UnboundLocationException
-                if (!Procedure.class.isAssignableFrom(operator.getClass())) {
+                EvalResult evalResult = GeiserEval.evaluator.eval(lang, env, symId);
+                operatorMaybe = evalResult.getResult() != null
+                        ? Optional.of(evalResult.getResult())
+                        : Optional.empty();
+                if (operatorMaybe.isPresent() && Procedure.class.isAssignableFrom(operatorMaybe.get().getClass())) {
+                    Procedure operator = (Procedure) operatorMaybe.get();
+                    ProcDataGeneric procDataGeneric = ProcDataGeneric.makeForProcedure(operator);
+                    operatorArgListMaybe = Optional.of(new OperatorArgListData(procDataGeneric));
+                } else {
                     // Not a procedure
                     // TODO : is it possible to implement autodoc for macros?
                     //        If not: write a comment why.
                     operatorArgListMaybe = Optional.empty();
-                } else {
-                    ProcDataGeneric procDataGeneric = ProcDataGeneric.makeForProcedure((Procedure) operator);
-                    operatorArgListMaybe = Optional.of(new OperatorArgListData(procDataGeneric));
                 }
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
             }
 
             this.operatorArgListMaybe = operatorArgListMaybe;
-            this.operator = operator;
-            this.symExists = symExists;
+            this.operatorMaybe = operatorMaybe;
+            this.symExists = operatorMaybe.isPresent();
         }
 
         public LList toLList() {
@@ -251,8 +242,8 @@ public class GeiserAutodoc extends Procedure1or2 {
             // TODO: When we find the correct way to do it, refactor moduleValue inside
             //       ProcDataNonGeneric or a generic wrapper for Procedure data
             LList moduleValue = null;
-            if (operator.getClass() == CompiledProc.class) {
-                CompiledProc compProc = (CompiledProc) operator;
+            if (operatorMaybe.isPresent() && operatorMaybe.get().getClass() == CompiledProc.class) {
+                CompiledProc compProc = (CompiledProc) operatorMaybe.get();
                 moduleValue = LList.makeList(
                         java.util.Arrays
                                 .asList(compProc
@@ -289,26 +280,26 @@ public class GeiserAutodoc extends Procedure1or2 {
             //   java.lang.String:format
             // so geiser ignores it.
             String symIdAsStr = symId.toString();
-            LList returnMe;
+            LList res;
             if (moduleValue.size() > 0) {
                 ArrayList<Object> moduleList = new ArrayList<>();
                 moduleList.add("module");
                 for (Object m : moduleValue) {
                     moduleList.add(Symbol.valueOf(m.toString()));
                 }
-                returnMe = LList.list3(
+                res = LList.list3(
                         symIdAsStr,
                         operatorArgListAsLList,
                         LList.makeList(moduleList)
                 );
             } else {
-                returnMe = LList.list2(
+                res = LList.list2(
                         symIdAsStr,
                         operatorArgListAsLList
                 );
             }
 
-            return returnMe;
+            return res;
         }
     }
 }

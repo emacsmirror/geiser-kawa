@@ -5,20 +5,15 @@
 
 package kawageiser;
 
-import gnu.mapping.Procedure0;
 import gnu.mapping.Values;
 
-public class GeiserNoValues extends Procedure0 {
+public class GeiserNoValues {
 
-    GeiserNoValues(String name) {
-        super(name);
-    }
-
-    @Override
-    public Object apply0() throws Throwable {
+    public static Object noValues() {
         gnu.kawa.io.InPort.inDefault().setLineNumber(
                 gnu.kawa.io.InPort.inDefault().getLineNumber() - 1);
         // apply0 signature doesn't allow us to return void
         return Values.FromArray.make();
     }
+
 }

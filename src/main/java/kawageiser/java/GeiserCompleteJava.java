@@ -9,7 +9,6 @@ import gnu.expr.Language;
 import gnu.lists.IString;
 import gnu.lists.LList;
 import gnu.mapping.Environment;
-import gnu.mapping.Procedure4;
 import gnu.math.IntNum;
 import kawadevutil.complete.*;
 
@@ -19,44 +18,24 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class GeiserCompleteJava extends Procedure4 {
+public class GeiserCompleteJava {
 
-    public static boolean showTypes = true;
-
-    public GeiserCompleteJava(String name) {
-        super(name);
-    }
-
-    @Override
-    public Object
-    apply4(Object codeStr, Object cursorIndex, Object lang, Object env) throws Throwable {
-
-        String codeStrChecked = null;
-        if (codeStr.getClass().equals(IString.class) || codeStr.getClass().equals(String.class)) {
-            codeStrChecked = codeStr.toString();
-        } else {
-            throw new IllegalArgumentException(
-                    "`codeStr` must be either String or IString: " + codeStr.getClass().toString());
-        }
-
-        Integer cursorIndexChecked = null;
-        if (cursorIndex.getClass().equals(Integer.class)) {
-            cursorIndexChecked = (Integer) cursorIndex;
-        } else if (cursorIndex.getClass().equals(IntNum.class)) {
-            cursorIndexChecked = ((IntNum) cursorIndex).intValue();
-        } else {
-            throw new IllegalArgumentException(
-                    "`cursorIndex` must be either Integer or IntNum: "
-                            + cursorIndex.getClass().toString());
-        }
+    public static String
+    completeJava(IString codeStr, IntNum cursorIndex, Language lang, Environment env)
+            throws Throwable {
 
         // Get Data
         Optional<CompletionDataForJava> complDataMaybe = kawadevutil.complete.Complete.complete(
-                codeStrChecked, cursorIndexChecked, (Language) lang, (Environment) env, (String name) -> true);
+                codeStr.toString(),
+                Integer.valueOf(cursorIndex.toString()),
+                lang,
+                env,
+                (String name) -> true);
 
         // Wrap data of interest in Scheme's LList
+        String resAsStr;
         if (!complDataMaybe.isPresent()) {
-            return LList.Empty;
+            resAsStr = gnu.kawa.functions.Format.format("~A", LList.Empty).toString();
         } else {
             CompletionDataForJava complData = complDataMaybe.get();
             LList res = null;
@@ -69,8 +48,10 @@ public class GeiserCompleteJava extends Procedure4 {
                 throw new Error("[BUG SPOTTED] `complData's class is one not expected: "
                         + complData.getClass().toString());
             }
-            return gnu.kawa.functions.Format.format("~S", res);
+            resAsStr = gnu.kawa.functions.Format.format("~S", res).toString();
         }
+
+        return resAsStr;
     }
 
     private static LList toLList(CompletionDataForJavaFOM complData) {
@@ -112,5 +93,4 @@ public class GeiserCompleteJava extends Procedure4 {
         );
         return res;
     }
-
 }

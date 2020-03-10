@@ -1,31 +1,17 @@
 /*
- * Copyright (C) 2020 spellcard199 <spellcard199@protonmail.com>           
+ * Copyright (C) 2020 spellcard199 <spellcard199@protonmail.com>
  * This is free software;  for terms and warranty disclaimer see ./COPYING.
  */
 
 package kawageiser.geiserDoc;
 
-import gnu.lists.IString;
-import gnu.mapping.Procedure1;
-
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
 
-public class ManualEpubUnzipToTmpDir extends Procedure1 {
+public class ManualEpubUnzipToTmpDir {
 
-    public ManualEpubUnzipToTmpDir(String name) {
-        super(name);
-    }
-
-    @Override
-    public Object apply1(Object kawaEpubManualPath) throws Throwable {
-        if (! (kawaEpubManualPath.getClass() == String.class ||
-                kawaEpubManualPath.getClass() == IString.class)) {
-            throw new IllegalArgumentException(
-                    "`kawaEpubManualPath' arg must be either String or IString");
-        }
+    public static String unzipToTmpDir(String kawaEpubManualPath) throws IOException {
         String systemTmpDir = System.getProperty("java.io.tmpdir");
         String manualUnzippedTmpDir = String.join(
                 File.separator,
@@ -33,10 +19,10 @@ public class ManualEpubUnzipToTmpDir extends Procedure1 {
                 "geiser-kawa",
                 "manual-epub-unzipped");
 
-        File zipArchiveFile = new File(kawaEpubManualPath.toString());
+        File zipArchiveFile = new File(kawaEpubManualPath);
         Path destDirPath = new File(manualUnzippedTmpDir).toPath();
 
         kawadevutil.util.ZipExtractor.unzip(zipArchiveFile, destDirPath);
-        return gnu.kawa.functions.Format.format("~S", manualUnzippedTmpDir);
+        return gnu.kawa.functions.Format.format("~S", manualUnzippedTmpDir).toString();
     }
 }

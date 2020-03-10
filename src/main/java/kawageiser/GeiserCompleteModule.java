@@ -6,59 +6,31 @@
 package kawageiser;
 
 import gnu.expr.Language;
-import gnu.lists.IString;
 import gnu.lists.LList;
 import gnu.mapping.Environment;
-import gnu.mapping.Procedure1or2;
+import gnu.mapping.NamedLocation;
 import kawadevutil.kawa.GnuMappingLocation;
 
 import java.util.ArrayList;
 
+public class GeiserCompleteModule {
 
-public class GeiserCompleteModule extends Procedure1or2 {
-
-    GeiserCompleteModule(String name) {
-        super(name);
+    public static String completeModule(String prefix) {
+        return completeModule(prefix, Language.getDefaultLanguage().getEnvironment());
     }
 
-    @Override
-    public Object apply1(Object prefix) throws Throwable {
-        return apply2(
-                prefix,
-                Language.getDefaultLanguage().getEnvironment());
-    }
-
-    @Override
-    public Object apply2(Object prefix, Object env) throws Throwable {
-
-        String prefixStr = null;
-        if (prefix instanceof String) {
-            prefixStr = (String) prefix;
-        } else if (prefix instanceof IString) {
-            prefixStr = prefix.toString();
-        } else {
-            throw new IllegalArgumentException(
-                    "`prefix' arg should be either a String or an IString");
-        }
-
-        Environment castedEnv;
-        if (Environment.class.isAssignableFrom(env.getClass())) {
-            castedEnv = (Environment) env;
-        } else {
-            throw new IllegalArgumentException(
-                    "`env' arg should be an gnu.mapping.Environment");
-        }
-
-        ArrayList<String> moduleCompletions = getCompletions(prefixStr, castedEnv);
+    public static String completeModule(String prefix, Environment env) {
+        ArrayList<String> moduleCompletions = getCompletions(prefix, env);
         // Geiser protocol wants modules in the result to be printed
         // between double quotes
         // ("(... ... ...)" "(... ...)")
         // Kawa repl doesn't show returned strings with surrounding
         // quotes, so we have to manually surround completions.
-        return gnu.kawa.functions.Format.format("~S", LList.makeList(moduleCompletions));
+        return gnu.kawa.functions.Format.format(
+                "~S", LList.makeList(moduleCompletions)).toString();
     }
 
-    private ArrayList<String> getCompletions(String prefix, Environment env) {
+    public static ArrayList<String> getCompletions(String prefix, Environment env) {
 
         ArrayList<String> moduleCompletions = new ArrayList<>();
 
@@ -68,14 +40,11 @@ public class GeiserCompleteModule extends Procedure1or2 {
         // TODO: this is an hack. If it exists, find a way to list
         //       modules directly.
         env.enumerateAllLocations().forEachRemaining(
-                loc ->
-                {
-                    String moduleStrRepr = GnuMappingLocation
-                            .baseLocationToModuleName(loc.getBase());
-                    if ((!moduleCompletions.contains(moduleStrRepr))
-                            && (!(moduleStrRepr.equals("")))
-                            && (moduleStrRepr.startsWith(prefix))
-                    ) {
+                (NamedLocation loc) -> {
+                    String moduleStrRepr = GnuMappingLocation.baseLocationToModuleName(loc.getBase());
+                    if (!moduleCompletions.contains(moduleStrRepr)
+                            && !moduleStrRepr.equals("")
+                            && moduleStrRepr.startsWith(prefix)) {
                         moduleCompletions.add(moduleStrRepr);
                     }
                 }

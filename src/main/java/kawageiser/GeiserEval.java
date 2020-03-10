@@ -10,13 +10,12 @@ import gnu.lists.IString;
 import gnu.lists.LList;
 import gnu.lists.Pair;
 import gnu.mapping.Environment;
-import gnu.mapping.Procedure2;
 import gnu.mapping.Symbol;
 import kawadevutil.eval.EvalResult;
 import kawadevutil.eval.EvalResultAndOutput;
 import kawadevutil.redirect.RedirectedOutErr;
 
-public class GeiserEval extends Procedure2 {
+public class GeiserEval {
     /*
      *  Actual evaluation happens in kawadevutil.eval.Eval.
      *  Here we are just sending arguments and converting our own
@@ -24,13 +23,8 @@ public class GeiserEval extends Procedure2 {
      */
     public static kawadevutil.eval.Eval evaluator = new kawadevutil.eval.Eval();
 
-    GeiserEval(String procName) {
-        super(procName);
-    }
-
-    @Override
-    public String
-    apply2(Object module, Object codeStr) {
+    public static String
+    evalStr(Environment module, IString codeIStr) {
         // The reason this method takes a string instead of a quoted sexpr has been solved
         // on 2019-12-19 in Kawa's master branch:
         // https://gitlab.com/kashell/Kawa/-/commit/537e135c0101194702ebee53faf92b98a4ea8c6b
@@ -45,22 +39,7 @@ public class GeiserEval extends Procedure2 {
         //      (print send-this)
         //      send-this))
         //
-
-        String code;
-        if (codeStr instanceof IString) {
-            code = ((IString) codeStr).toString();
-        } else if (codeStr instanceof String) {
-            code = (String) codeStr;
-        } else {
-            throw new IllegalArgumentException(
-                    "`codeStr' arg should be either a String or an IString");
-        }
-        return evalStr((Environment) module, code);
-    }
-
-    public static String
-    evalStr(Environment module, String codeStr) {
-        EvalResultAndOutput resOutErr = evaluator.evalCatchingOutErr(module, codeStr);
+        EvalResultAndOutput resOutErr = evaluator.evalCatchingOutErr(module, codeIStr.toString());
         return formatGeiserProtocol(evaluationDataToGeiserProtocol(resOutErr));
     }
 

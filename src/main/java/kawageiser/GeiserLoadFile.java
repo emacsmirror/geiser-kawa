@@ -6,32 +6,12 @@
 package kawageiser;
 
 import gnu.expr.Language;
-import gnu.lists.IString;
 import gnu.lists.LList;
-import gnu.mapping.Procedure1;
 import kawa.standard.load;
 
-public class GeiserLoadFile extends Procedure1 {
+public class GeiserLoadFile {
 
-    GeiserLoadFile(String name) {
-        super(name);
-    }
-
-    @Override
-    public Object apply1(Object o) throws Throwable {
-        String filepath;
-        if (o instanceof String) {
-            filepath = (String) o;
-        } else if (o instanceof IString) {
-            filepath = ((IString) o).toString();
-        } else {
-            throw new IllegalArgumentException(
-                    "geiser:load should take a String or an IString as argument");
-        }
-        return load(filepath);
-    }
-
-    public Object load(String filepath) {
+    public static String loadFile(String filepath) {
         return GeiserEval.evalForm(
                 Language.getDefaultLanguage().getEnvironment(),
                 LList.list2(load.load, filepath));

@@ -186,6 +186,7 @@
              (format
               "(geiser:eval (interaction-environment) %S)"
               (cadr args))))
+       (setq moo send-this)
        send-this))
 
     ((load-file compile-file)
@@ -248,9 +249,8 @@
 
 ;;;; Support for manual in .epub format
 
-;; FIXME: port old scheme logic to java
 (cl-defun geiser-kawa--manual-epub-unzip-to-tmpdir
-    (&optional (epub-path geiser-kawa--manual))
+    (&optional (epub-path geiser-kawa-manual-path))
   "Unzip the .epub file with kawa/java, since:
 - kawa is already a dependency
 - kawa/java is more portable that using emacs' arc-mode, which relies
