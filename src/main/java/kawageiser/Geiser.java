@@ -42,33 +42,39 @@ public class Geiser implements Runnable {
         // - type warnings: for the same reason of the previous point
         // - less boilerplate for checking argument types
         try {
-            lang.defineFunction(
-                    "geiser:eval",
-                    lang.eval("kawageiser.GeiserEval:evalStr"));
-            lang.defineFunction(
-                    "geiser:autodoc",
-                    lang.eval("kawageiser.GeiserAutodoc:autodoc"));
-            lang.defineFunction(
-                    "geiser:module-completions",
-                    lang.eval("kawageiser.GeiserCompleteModule:completeModule"));
-            lang.defineFunction(
-                    "geiser:load-file",
-                    lang.eval("kawageiser.GeiserLoadFile:loadFile"));
-            lang.defineFunction(
-                    "geiser:completions",
-                    lang.eval("kawageiser.GeiserCompleteSymbol:getCompletions"));
-            lang.defineFunction(
-                    "geiser:no-values",
-                    lang.eval("kawageiser.GeiserNoValues:noValues"));
-            lang.defineFunction(
-                    "geiser:complete-java",
-                    lang.eval("kawageiser.java.GeiserCompleteJava:completeJava"));
-            lang.defineFunction(
-                    "geiser:manual-epub-unzip-to-tmp-dir",
-                    lang.eval("kawageiser.geiserDoc.ManualEpubUnzipToTmpDir:unzipToTmpDir"));
-            lang.defineFunction(
-                    "geiser:macroexpand",
-                    lang.eval("kawageiser.GeiserMacroexpand:expand"));
+            if (lang.lookup("geiser:eval") == null) {
+                // The reason for this if block is that if someone re-imported this module
+                // and the following code was executed, this exception would happen:
+                // java.lang.IllegalStateException:
+                //   prohibited define/redefine of geiser:eval in #<environment kawa-environment>
+                lang.defineFunction(
+                        "geiser:eval",
+                        lang.eval("kawageiser.GeiserEval:evalStr"));
+                lang.defineFunction(
+                        "geiser:autodoc",
+                        lang.eval("kawageiser.GeiserAutodoc:autodoc"));
+                lang.defineFunction(
+                        "geiser:module-completions",
+                        lang.eval("kawageiser.GeiserCompleteModule:completeModule"));
+                lang.defineFunction(
+                        "geiser:load-file",
+                        lang.eval("kawageiser.GeiserLoadFile:loadFile"));
+                lang.defineFunction(
+                        "geiser:completions",
+                        lang.eval("kawageiser.GeiserCompleteSymbol:getCompletions"));
+                lang.defineFunction(
+                        "geiser:no-values",
+                        lang.eval("kawageiser.GeiserNoValues:noValues"));
+                lang.defineFunction(
+                        "geiser:complete-java",
+                        lang.eval("kawageiser.java.GeiserCompleteJava:completeJava"));
+                lang.defineFunction(
+                        "geiser:manual-epub-unzip-to-tmp-dir",
+                        lang.eval("kawageiser.geiserDoc.ManualEpubUnzipToTmpDir:unzipToTmpDir"));
+                lang.defineFunction(
+                        "geiser:macroexpand",
+                        lang.eval("kawageiser.GeiserMacroexpand:expand"));
+            }
         } catch (Throwable throwable) {
             throwable.printStackTrace();
         }
