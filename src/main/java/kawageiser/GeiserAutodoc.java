@@ -211,6 +211,10 @@ public class GeiserAutodoc {
                     Procedure operator = (Procedure) operatorMaybe.get();
                     ProcDataGeneric procDataGeneric = ProcDataGeneric.makeForProcedure(operator);
                     operatorArgListMaybe = Optional.of(new OperatorArgListData(procDataGeneric));
+                } else if (operatorMaybe.isPresent() && operatorMaybe.get().getClass().equals(Class.class)){
+                    Class clz = (Class) operatorMaybe.get();
+                    ProcDataGeneric procDataGeneric = ProcDataGeneric.makeForConstructors(clz);
+                    operatorArgListMaybe = Optional.of(new OperatorArgListData(procDataGeneric));
                 } else {
                     // Not a procedure
                     // TODO : is it possible to implement autodoc for macros?
