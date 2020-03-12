@@ -6,6 +6,7 @@
 package kawageiser;
 
 import gnu.expr.Language;
+import kawadevutil.complete.CompletionDataForJavaPackage;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -59,6 +60,12 @@ public class Geiser implements Runnable {
 
         try {
             if (lang.lookup("geiser:eval") == null) {
+                // Tell kawadevutil to build package cache, which takes a couple of seconds,
+                // in a separate thread, so user doesn't have to wait later.
+                new Thread(
+                        () -> CompletionDataForJavaPackage.getChildrenNamesOfRoot(true)
+                ).start();
+
                 // The reason for this if block is that if someone re-imported this module
                 // and the following code was executed, this exception would happen:
                 // java.lang.IllegalStateException:
