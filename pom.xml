@@ -63,7 +63,7 @@
         <dependency>
             <groupId>com.gitlab.spellcard199</groupId>
             <artifactId>kawa-devutil</artifactId>
-            <version>20fc0da50d6059584615bd226d9abb699edb7274</version>
+            <version>0b00cca508863b81b2157b706e1496bd05b77fa7</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.testng/testng -->

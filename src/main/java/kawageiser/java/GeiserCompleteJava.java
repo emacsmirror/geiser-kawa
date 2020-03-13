@@ -58,7 +58,7 @@ public class GeiserCompleteJava {
         String completionsForClass = complData.getForClass().getName();
         // I don't know why it says "unchecked call" when using complData.getRequiredModifiers().stream()
         ArrayList<String> modifiers = new ArrayList<>();
-        for (Object modifier : complData.getRequiredModifiers()) {
+        for (Object modifier : complData.getModifierMask().getRequired()) {
             modifiers.add(modifier.toString());
         }
 
