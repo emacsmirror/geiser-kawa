@@ -117,7 +117,7 @@
   :type 'string
   :group 'geiser-kawa)
 
-(defcustom geiser-kawa-use-kawa-version-included-in-kawa-geiser
+(defcustom geiser-kawa-use-included-kawa
   nil
   "Instead of downloading kawa yourself, you can use the Kawa version
  included in geiser-kawa, which is the head of Kawa's master branch."
@@ -129,8 +129,8 @@
 
 (defun geiser-kawa--binary ()
   ". If `geiser-kawa-binary' is a list, take the first and ignore
- `geiser-kawa-use-kawa-version-included-in-kawa-geiser'."
-  (if geiser-kawa-use-kawa-version-included-in-kawa-geiser
+ `geiser-kawa-use-included-kawa'."
+  (if geiser-kawa-use-included-kawa
       "java"
     (if (listp geiser-kawa-binary)
         (car geiser-kawa-binary)
@@ -140,7 +140,7 @@
   (let ((jars
          (append
           (if (and
-               (not geiser-kawa-use-kawa-version-included-in-kawa-geiser)
+               (not geiser-kawa-use-included-kawa)
                (executable-find geiser-kawa-binary))
               (let ((lib-dir (expand-file-name
                               "../lib/"
@@ -170,7 +170,7 @@
   "Return a list with all parameters needed to start Kawa Scheme."
   (append
    (list (format "-Djava.class.path=%s" (geiser-kawa--make-classpath)))
-   (if geiser-kawa-use-kawa-version-included-in-kawa-geiser
+   (if geiser-kawa-use-included-kawa
        (list "kawa.repl"))
    geiser-kawa--arglist))
 
