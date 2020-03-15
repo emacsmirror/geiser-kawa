@@ -32,8 +32,7 @@ Only versions of Kawa > 3.1 are supported, mostly due to the fact that before th
             - info: using emacs' Info-mode
             - epub: using emacs' eww browser
 - kawa- and java-specific:
-    - completion for java's field and method names accessed through colon-notation (don't expect java-grade reliability)
-    - completion for java's package and class names
+    - [[#7ca3650a-2658-42f0-8274-96f194768e11][Completion for java's package, class, field, method names]]
 
 ** Unsupported features
 
@@ -64,15 +63,23 @@ To try geiser-kawa you need neither Maven nor Kawa:
 - =mvnw= ([[https://github.com/takari/maven-wrapper][maven-wrapper]]) takes care of downloading a project-specific Maven version
 - kawa-geiser has [[https://gitlab.com/groups/kashell/][Kawa's master branch]] as one of its dependencies. When =quickstart.el= calls =./mvnw package= (wrapped by =geiser-kawa-compile-java-dependencies=), it produces a jar that includes kawa-geiser and all its dependencies, including Kawa itself.
 
-** About completion for java's fields, methods and packages (that's what =fmp= stands for in the function names)
+** About completion for java's fields, methods and packages
+:PROPERTIES:
+:CUSTOM_ID:       7ca3650a-2658-42f0-8274-96f194768e11
+:END:
 
 The whole project is in a persistent "experimental" state, but this part even more so because it's based on assumptions I'm not sure about.
 
-The main interactive elisp function is =geiser-kawa-complete-java-fmp-at-point=. It's not bound to a key by default.
+The main interactive elisp function is =geiser-kawa-complete-java-fmp-at-point=. By default, it's not bound to a key. (fmp stands for field-method-package).
 
-For this to work you have to:
-- use Kawa's type annotations: rememver that the Kawa compiler mostly trusts you
-- avoid syntax errors (e.g. unbalanced parentheses, wrong number of children sexps inside a form, etc...)
+Supported forms (with issues) are:
+    - completion for package and class names: dot notation, like in java
+    - completion for field and method names:
+        - =field=, =slot-ref=
+        - =static-field=
+        - =invoke=
+        - =invoke-static=
+        - colon notation
 
 How it works (the region getting part is quite rudimentray):
 1. A region of the current buffer and cursor point inside it are sent to kawa-geiser, which uses [[https://gitlab.com/spellcard199/kawa-devutil][kawa-devutil]] for actual functionality. The region of the buffer goes:
@@ -82,11 +89,9 @@ How it works (the region getting part is quite rudimentray):
      - to: either:
          - end of sexp beginning at toplevel, if =(geiser-syntax--pop-to-top)= is non-nil
          - =(line-end-position)=, if =(geiser-syntax--pop-to-top)= is =nil=
-2. An arbitrary symbol is added at cursor point, so it can be found again in the AST
-3. Code is compiled into Kawa's AST, but not evaluated
-4. Various AST "matchers" (functions that check if a certain pattern is found) are tried in order until either:
-     - one of them matches: the matcher function itself then also has to tell which class we are completing for
-     - none are left: empty data
+2. [[https://gitlab.com/spellcard199/kawa-devutil][kawa-devutil]]'s completion method is called passing code and cursor point
+
+You can find some examples and known issues in [[https://gitlab.com/spellcard199/kawa-devutil][kawa-devutil]]'README.
 
 ** Difference from [[https://gitlab.com/spellcard199/geiser-kawa-scheme][geiser-kawa-scheme]]
 
