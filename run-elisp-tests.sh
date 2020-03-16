@@ -1,0 +1,1 @@
+cask exec buttercup -L .
