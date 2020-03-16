@@ -97,21 +97,28 @@
         (end-of-buffer)
         (switch-to-buffer-other-window save-buf)))))
 
-(defun geiser-kawa--deps-run-kawa-advice-add()
+(defun geiser-kawa--deps-run-kawa--advice-add()
   (add-function :override
                 (symbol-function 'run-kawa)
                 #'geiser-kawa--deps-run-kawa-advice))
 
-(defun geiser-kawa--deps-run-kawa-advice-remove()
+(defun geiser-kawa--deps-run-kawa--advice-remove()
   (remove-function (symbol-function 'run-kawa)
                    #'geiser-kawa--deps-run-kawa-advice))
 
 (defun geiser-kawa--deps-run-kawa-unadviced()
-  (geiser-kawa--deps-run-kawa-advice-remove)
+  (geiser-kawa--deps-run-kawa--advice-remove)
   (run-kawa)
   (geiser-kawa--deps-run-kawa-advice-add))
 
-(defun geiser-kawa--deps-run-kawa-removecompilhook(buf desc)
+(defun geiser-kawa--deps-run-kawa--add-compil-hook()
+  ;; The added hook auto-removes itself after being called once.
+  (add-hook 'compilation-finish-functions
+            #'geiser-kawa--deps-run-kawa--remove-compil-hook))
+
+(defun geiser-kawa--deps-run-kawa-remove-compil-hook(buf desc)
+  ;; Removes itself from `compilation-finish-functions'
+  ;; when called.
   (geiser-kawa--deps-run-kawa-unadviced)
   (remove-hook 'compilation-finish-functions
                #'geiser-kawa--deps-run-kawa-remove-compil-hook))
@@ -121,9 +128,7 @@
       (geiser-kawa--deps-run-kawa-unadviced)
     (when (y-or-n-p
            "geiser-kawa depends on additional java libraries. Do you want to download and compile them now?")
-      (add-hook
-       'compilation-finish-functions
-       #'geiser-kawa--deps-run-kawa-removecompilhook)
+      (geiser-kawa--deps-run-kawa--add-compil-hook)
       (geiser-kawa-deps-mvn-package))))
 
 
@@ -424,7 +429,7 @@ Argument MOD is passed by geiser, but it's not used here."
 (geiser-impl--add-to-alist 'regexp "\\.sld$" 'kawa t)
 
 ;; Check for kawa-geiser jar each time `run-kawa' is called.
-(geiser-kawa--deps-run-kawa-advice-add)
+(geiser-kawa--deps-run-kawa--advice-add)
 
 (provide 'geiser-kawa)
 

@@ -152,7 +152,7 @@
      `("code-str"     . ,code-str)
      `("cursor-index" . ,cursor-index))))
 
-(defun geiser-kawa-complete-java-fmp-at-point ()
+(defun geiser-kawa-complete-fmp-at-point ()
   (interactive)
   "Complete java field or method or package (fmp) at point"
 
@@ -176,3 +176,5 @@
     ))
 
 (provide 'geiser-kawa-complete-java)
+
+;;; geiser-kawa-complete-java.el ends here
