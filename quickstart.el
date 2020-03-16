@@ -9,12 +9,14 @@
 (require 'geiser-mode)
 (defun run-kawa-after-compilation-finishes (buffer desc)
   ;; Use included Kawa, to avoid issues with unsupported old Kawa versions (< 3.1.1)
-  (setq geiser-kawa-use-kawa-version-included-in-kawa-geiser t)
+  (setq geiser-kawa-use-included-kawa t)
   (run-kawa)
   (switch-to-buffer-other-window "*scratch*")
   (geiser-impl--set-buffer-implementation 'kawa)
   (geiser-mode)
-  (remove-hook 'compilation-finish-functions #'run-kawa-after-compilation-finishes))
+  (remove-hook 'compilation-finish-functions
+	       #'run-kawa-after-compilation-finishes))
 
-(add-hook 'compilation-finish-functions #'run-kawa-after-compilation-finishes)
-(geiser-kawa-mvn-package-java-deps)
+(add-hook 'compilation-finish-functions
+          #'run-kawa-after-compilation-finishes)
+(geiser-kawa-deps-mvn-package)

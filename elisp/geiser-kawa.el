@@ -75,22 +75,56 @@
 ;; End of adaptations for making this package separate from geiser
 
 
-;; Download, compile and package "kawa-geiser" and its recursive
-;; dependencies into a fat jar.
-(defun geiser-kawa-mvn-package-java-deps()
-  (interactive)
-  (let ((default-directory geiser-kawa-dir))
-    (compile "./mvnw package")))
-
 ;; Using `mvn package' from the pom.xml's directory should produce a
 ;; jar containing all the java dependencies.
-(defcustom geiser-kawa-kawa-geiser-jar-path
+(defcustom geiser-kawa-deps-jar-path
   (expand-file-name
    "./target/kawa-geiser-0.1-SNAPSHOT-jar-with-dependencies.jar"
    geiser-kawa-dir)
   "Path to the kawa-geiser fat jar."
   :type 'string
   :group 'geiser-kawa)
+
+;; Download, compile and package "kawa-geiser" and its recursive
+;; dependencies into a fat jar.
+(defun geiser-kawa-deps-mvn-package()
+  (interactive)
+  (let* ((default-directory geiser-kawa-dir)
+         (mvn-buf (compile "./mvnw package")))
+    (when mvn-buf
+      (let ((save-buf (current-buffer)))
+        (switch-to-buffer-other-window mvn-buf)
+        (end-of-buffer)
+        (switch-to-buffer-other-window save-buf)))))
+
+(defun geiser-kawa--deps-run-kawa-advice-add()
+  (add-function :override
+                (symbol-function 'run-kawa)
+                #'geiser-kawa--deps-run-kawa-advice))
+
+(defun geiser-kawa--deps-run-kawa-advice-remove()
+  (remove-function (symbol-function 'run-kawa)
+                   #'geiser-kawa--deps-run-kawa-advice))
+
+(defun geiser-kawa--deps-run-kawa-unadviced()
+  (geiser-kawa--deps-run-kawa-advice-remove)
+  (run-kawa)
+  (geiser-kawa--deps-run-kawa-advice-add))
+
+(defun geiser-kawa--deps-run-kawa-removecompilhook(buf desc)
+  (geiser-kawa--deps-run-kawa-unadviced)
+  (remove-hook 'compilation-finish-functions
+               #'geiser-kawa--deps-run-kawa-remove-compil-hook))
+
+(defun geiser-kawa--deps-run-kawa-advice()
+  (if (file-exists-p geiser-kawa-deps-jar-path)
+      (geiser-kawa--deps-run-kawa-unadviced)
+    (when (y-or-n-p
+           "geiser-kawa depends on additional java libraries. Do you want to download and compile them now?")
+      (add-hook
+       'compilation-finish-functions
+       #'geiser-kawa--deps-run-kawa-removecompilhook)
+      (geiser-kawa-deps-mvn-package))))
 
 
 ;;; Customization:
@@ -154,7 +188,7 @@
                      (concat lib-dir "jline.jar"))
                   nil))
             nil)
-          (list geiser-kawa-kawa-geiser-jar-path))))
+          (list geiser-kawa-deps-jar-path))))
     (mapconcat #'identity jars ":")))
 
 (defvar geiser-kawa--arglist
@@ -388,6 +422,9 @@ Argument MOD is passed by geiser, but it's not used here."
 
 (geiser-impl--add-to-alist 'regexp "\\.scm$" 'kawa t)
 (geiser-impl--add-to-alist 'regexp "\\.sld$" 'kawa t)
+
+;; Check for kawa-geiser jar each time `run-kawa' is called.
+(geiser-kawa--deps-run-kawa-advice-add)
 
 (provide 'geiser-kawa)
 
