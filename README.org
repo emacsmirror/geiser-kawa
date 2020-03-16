@@ -61,7 +61,7 @@ Only versions of Kawa > 3.1 are supported, mostly due to the fact that before th
 
 To try geiser-kawa you need neither Maven nor Kawa:
 - =mvnw= ([[https://github.com/takari/maven-wrapper][maven-wrapper]]) takes care of downloading a project-specific Maven version
-- kawa-geiser has [[https://gitlab.com/groups/kashell/][Kawa's master branch]] as one of its dependencies. When =quickstart.el= calls =./mvnw package= (wrapped by =geiser-kawa-compile-java-dependencies=), it produces a jar that includes kawa-geiser and all its dependencies, including Kawa itself.
+- kawa-geiser has [[https://gitlab.com/groups/kashell/][Kawa's master branch]] as one of its dependencies. When =quickstart.el= calls =./mvnw package= (wrapped by =geiser-kawa-deps-mvn-package=), it produces a jar that includes kawa-geiser and all its dependencies, including Kawa itself.
 
 ** About completion for java's fields, methods and packages
 :PROPERTIES:
@@ -70,7 +70,7 @@ To try geiser-kawa you need neither Maven nor Kawa:
 
 The whole project is in a persistent "experimental" state, but this part even more so because it's based on assumptions I'm not sure about.
 
-The main interactive elisp function is =geiser-kawa-complete-java-fmp-at-point=. By default, it's not bound to a key. (fmp stands for field-method-package).
+The main interactive elisp function is =geiser-kawa-complete-fmp-at-point=. By default, it's not bound to a key. (fmp stands for field-method-package).
 
 Supported forms (with issues) are:
     - completion for package and class names: dot notation, like in java
