@@ -123,11 +123,14 @@
   (remove-hook 'compilation-finish-functions
                #'geiser-kawa--deps-run-kawa-remove-compil-hook))
 
-(defun geiser-kawa--deps-run-kawa-advice()
+(defun geiser-kawa--deps-run-kawa-advice(&optional install-if-absent)
   (if (file-exists-p geiser-kawa-deps-jar-path)
       (geiser-kawa--deps-run-kawa-unadviced)
-    (when (y-or-n-p
-           "geiser-kawa depends on additional java libraries. Do you want to download and compile them now?")
+    (when (or install-if-absent
+              (y-or-n-p
+               (concat
+                "geiser-kawa depends on additional java libraries. "
+                "Do you want to download and compile them now?")))
       (geiser-kawa--deps-run-kawa--add-compil-hook)
       (geiser-kawa-deps-mvn-package))))
 
