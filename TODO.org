@@ -1,0 +1,38 @@
+** Fix bugs and unintended behavior
+
+Since =geiser-kawa= limits itself to ask =kawa-devutil= for data and then wrap it in geiser's protocol, most of the bugs are actually in =kawa-devutil=.
+
+- Completion for Java is often broken
+- Autodoc when using colon notation on Java methods doesn't show all the alternatives
+- Evaluation should not capture Java's output by default, only Kawa's: I wrote it this way because at the time I was convinced it was a feature, but then I realized it's bad design
+- Fix kawa-devutil issues
+
+** Add elisp tests, find bugs, fix them
+
+** Write melpa recipe and put on melpa
+
+There are still obvious bugs that need to be fixed before the quality of the package becomes sufficient for melpa.
+
+As of 2020-3-21 using =geiser-kawa= as a dependency for another Cask project using the following recipe seems work. Adapt it to melpa syntax when the package is ready.
+
+#+BEGIN_SRC emacs-lisp
+(depends-on "geiser-kawa"
+            :git "git@gitlab.com:spellcard199/geiser-kawa.git"
+            :branch "master"
+            :files ("elisp/*.el"
+                    "pom.xml" ".mvn" "mvnw" "mvnw.cmd"
+                    "src"))
+#+END_SRC
+
+** Check if Kawa, Emacs and Geiser work on Windows. If yes, when on Windows make the maven wrapper elisp wrapper run =mvnw.cmd= instead of =mvnw=
+** Add geiser-kawa-dev
+
+1. =geiser-kawa-dev--ast-expression=
+2. =geiser-kawa-dev--ast-for-fmp-completion=
+
+** Add geiser-kawa-java-find-pc (package or class)
+
+1. =geiser-kawa-java-find-pc-default-classloaders=
+2. =geiser-kawa-java-find-pc--cache=
+3. =geiser-kawa-java-find-pc-refresh-cache=
+3. =geiser-kawa-java-find-pc (&optional classloader-list)=
