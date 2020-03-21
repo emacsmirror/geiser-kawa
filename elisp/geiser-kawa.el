@@ -109,12 +109,12 @@
 (defun geiser-kawa--deps-run-kawa-unadviced()
   (geiser-kawa--deps-run-kawa--advice-remove)
   (run-kawa)
-  (geiser-kawa--deps-run-kawa-advice-add))
+  (geiser-kawa--deps-run-kawa--advice-add))
 
 (defun geiser-kawa--deps-run-kawa--add-compil-hook()
   ;; The added hook auto-removes itself after being called once.
   (add-hook 'compilation-finish-functions
-            #'geiser-kawa--deps-run-kawa--remove-compil-hook))
+            #'geiser-kawa--deps-run-kawa-remove-compil-hook))
 
 (defun geiser-kawa--deps-run-kawa-remove-compil-hook(buf desc)
   ;; Removes itself from `compilation-finish-functions'
