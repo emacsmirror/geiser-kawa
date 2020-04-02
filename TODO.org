@@ -24,12 +24,7 @@ As of 2020-3-21 using =geiser-kawa= as a dependency for another Cask project usi
                     "src"))
 #+END_SRC
 
-** Check if Kawa, Emacs and Geiser work on Windows. If yes, when on Windows make the maven wrapper elisp wrapper run =mvnw.cmd= instead of =mvnw=
-** Add geiser-kawa-dev
-
-1. =geiser-kawa-dev--ast-expression=
-2. =geiser-kawa-dev--ast-for-fmp-completion=
-
+** Check if Kawa, Emacs and Geiser work on Windows. If yes, make the elisp function wrapping maven wrapper run =mvnw.cmd= instead of =mvnw= when on Windows
 ** Add geiser-kawa-java-find-pc (package or class)
 
 1. =geiser-kawa-java-find-pc-default-classloaders=

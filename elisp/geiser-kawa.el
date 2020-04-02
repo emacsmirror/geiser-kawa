@@ -229,7 +229,6 @@
              (format
               "(geiser:eval (interaction-environment) %S)"
               (cadr args))))
-       (setq moo send-this)
        send-this))
 
     ((load-file compile-file)
