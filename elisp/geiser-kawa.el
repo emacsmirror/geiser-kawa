@@ -37,6 +37,7 @@
 (require 'cl)
 
 (require 'geiser-kawa-complete-java)
+(require 'geiser-kawa-exprtree)
 
 ;;; Code:
 
