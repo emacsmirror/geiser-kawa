@@ -56,7 +56,7 @@ public class GeiserEval {
 
         // result
         String geiserResult = evalRes.isSuccess()
-                ? evalRes.getResultAsString(Geiser.isPrettyPrintResult())
+                ? evalRes.getResultAsString(evaluator.isPrettyPrintResult())
                 : "";
 
         // output

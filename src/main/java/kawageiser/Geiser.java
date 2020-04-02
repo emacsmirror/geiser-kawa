@@ -13,24 +13,6 @@ import java.util.Map;
 
 public class Geiser implements Runnable {
 
-    private static boolean prettyPrintResult = true;
-
-    public static boolean isPrettyPrintResult() {
-        return prettyPrintResult;
-    }
-
-    public static boolean isPrettyPrintOutput() {
-        return GeiserEval.evaluator.isPrettyPrintOutput();
-    }
-
-    public static void setPrettyPrintResult(boolean v) {
-        prettyPrintResult = v;
-    }
-
-    public static void setPrettyPrintOutput(boolean v) {
-        GeiserEval.evaluator.setPrettyPrintOutput(v);
-    }
-
     @Override
     public void run() {
         // In a previous version, geiser's procedures definitions were like this:
@@ -49,6 +31,8 @@ public class Geiser implements Runnable {
         //  and replace methods paths as string with PrimProcedure. This would avoid Kawa-specific syntax.
         HashMap<String, String> procMap = new java.util.HashMap<>();
         procMap.put("geiser:eval", "kawageiser.GeiserEval:evalStr");
+        GeiserEval.evaluator.setPrettyPrintResult(true);
+        GeiserEval.evaluator.setPrettyPrintOutput(true);
         procMap.put("geiser:autodoc", "kawageiser.GeiserAutodoc:autodoc");
         procMap.put("geiser:module-completions", "kawageiser.GeiserCompleteModule:completeModule");
         procMap.put("geiser:load-file", "kawageiser.GeiserLoadFile:loadFile");
