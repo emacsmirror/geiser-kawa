@@ -5,7 +5,6 @@
 
 package kawageiser;
 
-import gnu.expr.Language;
 import gnu.lists.LList;
 import gnu.mapping.Environment;
 import gnu.mapping.NamedLocation;
@@ -16,7 +15,7 @@ import java.util.ArrayList;
 public class GeiserCompleteModule {
 
     public static String completeModule(String prefix) {
-        return completeModule(prefix, Language.getDefaultLanguage().getEnvironment());
+        return completeModule(prefix, Environment.user());
     }
 
     public static String completeModule(String prefix, Environment env) {

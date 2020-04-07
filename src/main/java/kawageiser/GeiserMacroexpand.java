@@ -5,7 +5,6 @@
 
 package kawageiser;
 
-import gnu.expr.Language;
 import gnu.kawa.functions.Format;
 import gnu.kawa.slib.syntaxutils;
 import gnu.mapping.Environment;
@@ -19,7 +18,7 @@ public class GeiserMacroexpand {
     public static String expand(Object form, boolean all) throws Throwable {
         // `all' is ignored: geiser passes #t or #f depending on whether it needs
         // expand-1 or expand-all, but Kawa's `expand' can only expand the whole tree.
-        return expand(form, Language.getDefaultLanguage().getEnvironment());
+        return expand(form, Environment.user());
     }
 
     public static String expand(Object form, Environment env) throws Throwable {

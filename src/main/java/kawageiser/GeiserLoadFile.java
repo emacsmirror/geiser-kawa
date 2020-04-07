@@ -5,15 +5,15 @@
 
 package kawageiser;
 
-import gnu.expr.Language;
 import gnu.lists.LList;
+import gnu.mapping.Environment;
 import kawa.standard.load;
 
 public class GeiserLoadFile {
 
     public static String loadFile(String filepath) {
         return GeiserEval.evalForm(
-                Language.getDefaultLanguage().getEnvironment(),
+                Environment.user(),
                 LList.list2(load.load, filepath));
     }
 }

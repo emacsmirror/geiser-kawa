@@ -58,7 +58,7 @@ public class GeiserAutodoc {
 
     public static String autodoc(LList ids) {
         Language language = Language.getDefaultLanguage();
-        return autodoc(ids, language, language.getEnvironment());
+        return autodoc(ids, language, Environment.user());
     }
 
     public static String autodoc(LList ids, Environment env) {
