@@ -6,7 +6,7 @@
 package kawageiser;
 
 import gnu.expr.Language;
-import kawadevutil.complete.CompletionDataForJavaPackage;
+import kawadevutil.complete.java.data.CompletionDataForJavaPackage;
 
 import java.util.HashMap;
 import java.util.Map;

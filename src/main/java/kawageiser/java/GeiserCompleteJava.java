@@ -12,7 +12,7 @@ import gnu.lists.LList;
 import gnu.mapping.Environment;
 import gnu.math.IntNum;
 import kawadevutil.ast.AstElemWrapper;
-import kawadevutil.complete.*;
+import kawadevutil.complete.java.data.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,7 +45,7 @@ public class GeiserCompleteJava {
 
         // Get Data
         Optional<CompletionDataForJava> complDataMaybe =
-                kawadevutil.complete.Complete.complete(
+                kawadevutil.complete.java.CompleteJavaFMP.complete(
                         codeStr.toString(),
                         Integer.valueOf(cursorIndex.toString()),
                         lang,
@@ -58,8 +58,7 @@ public class GeiserCompleteJava {
     }
 
     public static LList
-    complDataForJavaToLList(
-            CompletionDataForJava complData) {
+    complDataForJavaToLList(CompletionDataForJava complData) {
         // Wrap data of interest in Scheme's LList
         LList complDataAsLList = null;
         if (complData.getClass().equals(CompletionDataForJavaField.class)
@@ -128,7 +127,7 @@ public class GeiserCompleteJava {
             Environment env)
             throws IOException {
         Optional<CompletionDataForJava> complDataMaybe =
-                kawadevutil.complete.Complete.complete(
+                kawadevutil.complete.java.CompleteJavaFMP.complete(
                         codeStr.toString(),
                         Integer.valueOf(cursorIndex.toString()),
                         lang,
