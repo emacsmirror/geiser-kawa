@@ -24,9 +24,7 @@ import java.util.stream.Collectors;
 public class GeiserCompleteJava {
 
     public static String
-    completeJava(
-            IString codeStr,
-            IntNum cursorIndex)
+    completeJava(IString codeStr, IntNum cursorIndex)
             throws Throwable {
         return completeJava(
                 codeStr,
@@ -36,11 +34,8 @@ public class GeiserCompleteJava {
     }
 
     public static String
-    completeJava(
-            IString codeStr,
-            IntNum cursorIndex,
-            Language lang,
-            Environment env)
+    completeJava(IString codeStr, IntNum cursorIndex, Language lang,
+                 Environment env)
             throws Throwable {
 
         // Get Data
@@ -74,8 +69,7 @@ public class GeiserCompleteJava {
     }
 
     private static LList
-    toLList(
-            CompletionDataForJavaFOM complData) {
+    toLList(CompletionDataForJavaFOM complData) {
         String completionsForClass = complData.getForClass().getName();
         // I don't know why it says "unchecked call" when using complData.getRequiredModifiers().stream()
         ArrayList<String> modifiers = new ArrayList<>();
@@ -93,8 +87,7 @@ public class GeiserCompleteJava {
     }
 
     private static LList
-    toLList(
-            CompletionDataForJavaPackage complData) {
+    toLList(CompletionDataForJavaPackage complData) {
         ArrayList<LList> res = new ArrayList<>(getCommonData(complData));
         res.addAll(Arrays.asList(
                 LList.list2("package-name", complData.getPinfo().getName())
@@ -103,8 +96,7 @@ public class GeiserCompleteJava {
     }
 
     private static List<LList>
-    getCommonData(
-            CompletionDataForJava complData) {
+    getCommonData(CompletionDataForJava complData) {
         CompletionDataForJava.FieldOrMethodOrPackage fieldOrMethod = complData.getFieldOrMethodOrPackage();
         List<String> names = (List<String>) complData.getNames().stream().distinct().collect(Collectors.toList());
         String beforeCursor = complData.getCursorMatcher().getCursorMatch().getBeforeCursor();
@@ -120,11 +112,8 @@ public class GeiserCompleteJava {
     }
 
     public static Optional<AstElemWrapper>
-    getExprTreeMaybe(
-            IString codeStr,
-            IntNum cursorIndex,
-            Language lang,
-            Environment env)
+    getExprTreeMaybe(IString codeStr, IntNum cursorIndex, Language lang,
+                     Environment env)
             throws IOException {
         Optional<CompletionDataForJava> complDataMaybe =
                 kawadevutil.complete.java.CompleteJavaFMP.complete(
@@ -138,33 +127,23 @@ public class GeiserCompleteJava {
     }
 
     public static Optional<AstElemWrapper>
-    getExprTreeMaybe(
-            IString codeStr,
-            IntNum cursorIndex)
+    getExprTreeMaybe(IString codeStr, IntNum cursorIndex)
             throws IOException {
         return getExprTreeMaybe(
-                codeStr,
-                cursorIndex,
-                Language.getDefaultLanguage(),
-                Environment.user());
-
+                codeStr, cursorIndex,
+                Language.getDefaultLanguage(), Environment.user());
     }
 
-    public static String getExprTreeAndFormat(
-            IString codeStr,
-            IntNum cursorIndex,
-            Language lang,
-            Environment env)
+    public static String getExprTreeFormatted(IString codeStr, IntNum cursorIndex,
+                                              Language lang, Environment env)
             throws IOException {
         return getExprTreeMaybe(codeStr, cursorIndex, lang, env)
                 .map(complData -> complData.formatElem(true)).get();
     }
 
-    public static String getExprTreeAndFormat(
-            IString codeStr,
-            IntNum cursorIndex)
+    public static String getExprTreeFormatted(IString codeStr, IntNum cursorIndex)
             throws IOException {
-        return getExprTreeAndFormat(
+        return getExprTreeFormatted(
                 codeStr,
                 cursorIndex,
                 Language.getDefaultLanguage(),

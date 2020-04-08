@@ -3,7 +3,7 @@
  * This is free software;  for terms and warranty disclaimer see ./COPYING.
  */
 
-package kawageiser.geiserDoc;
+package kawageiser.docutil;
 
 import java.io.File;
 import java.io.IOException;

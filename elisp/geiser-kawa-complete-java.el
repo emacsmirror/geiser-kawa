@@ -6,6 +6,12 @@
 ;; not, see <http://www.xfree86.org/3.3.6/COPYRIGHT2.html#5>.
 
 (require 'subr-x)
+(require 'geiser-kawa-exprtree)
+
+;; fmp stands for:
+;; 1. Field
+;; 2. Method
+;; 3. Package
 
 (defun geiser-kawa--repl--point-after-prompt ()
   (save-excursion
@@ -21,7 +27,7 @@
            (geiser-syntax--pop-to-top)
            (point))))
 
-(defun geiser-kawa-complete-java--get-data (code-str cursor-index)
+(defun geiser-kawa-complete-fmp--get-data (code-str cursor-index)
   "`code' is a string containing the code. It must be syntatically
   scheme, including balanced parentheses.
 `cursor' is an integer representing where the cursor is in that code."
@@ -46,7 +52,7 @@
                                           "\t")))))
       (geiser-eval--retort-result geiser-answer))))
 
-(defun geiser-kawa-complete-java--user-choice--field-or-method
+(defun geiser-kawa-complete-fmp--user-choice--field-or-method
     (fm-compl-data)
   ;; fm stands for field or method.
   (let ((compl-for-class
@@ -74,7 +80,7 @@
      nil
      before-cursor)))
 
-(defun geiser-kawa-complete-java--user-choice--package
+(defun geiser-kawa-complete-fmp--user-choice--package
     (package-compl-data)
   (let ((field-or-method-or-package
          (cadr (assoc "field-or-method-or-package" package-compl-data)))
@@ -102,18 +108,18 @@
       "." (string-remove-prefix package-name before-cursor))
      )))
 
-(defun geiser-kawa-complete-java--user-choice-dispatch
+(defun geiser-kawa-complete-fmp--user-choice-dispatch
     (compl-data)
   (let ((compl-for (cadr (assoc "field-or-method-or-package"
                                 compl-data))))
     (cond ((equal compl-for "FIELD")
-           (geiser-kawa-complete-java--user-choice--field-or-method
+           (geiser-kawa-complete-fmp--user-choice--field-or-method
             compl-data))
           ((equal compl-for "METHOD")
-           (geiser-kawa-complete-java--user-choice--field-or-method
+           (geiser-kawa-complete-fmp--user-choice--field-or-method
             compl-data))
           ((equal compl-for "PACKAGE")
-           (geiser-kawa-complete-java--user-choice--package
+           (geiser-kawa-complete-fmp--user-choice--package
             compl-data))
 	  ((equal compl-for nil)
 	   (message "No completions found.")
@@ -121,7 +127,7 @@
           (t (error (format "[Unexpected condition] compl-for: %s"
                             (prin1-to-string compl-for)))))))
 
-(defun geiser-kawa-complete-java--code-point-from-toplevel ()
+(defun geiser-kawa-complete-fmp--code-point-from-toplevel ()
   (let* (reg-beg
          reg-end
          code-str
@@ -157,14 +163,14 @@
   "Complete java field or method or package (fmp) at point"
 
   (let* ((code-and-point-data
-          (geiser-kawa-complete-java--code-point-from-toplevel))
+          (geiser-kawa-complete-fmp--code-point-from-toplevel))
          (code-str     (cdr (assoc "code-str"
                                    code-and-point-data)))
          (cursor-index (cdr (assoc "cursor-index"
                                    code-and-point-data)))
-         (compl-data (geiser-kawa-complete-java--get-data
+         (compl-data (geiser-kawa-complete-fmp--get-data
                       code-str cursor-index))
-         (user-choice (geiser-kawa-complete-java--user-choice-dispatch
+         (user-choice (geiser-kawa-complete-fmp--user-choice-dispatch
                        compl-data)))
     (when (thing-at-point 'word)
       (if (looking-back ":" (- (point) 2))
@@ -175,6 +181,29 @@
     ;;   (kill-word 1)
     ))
 
+
+;;;; Functions to get the Expression tree that is made to try and get
+;;;; java completions. Useful when debugging why java completion fails.
+
+(defun geiser-kawa-complete-fmp--exprtree (code-str cursor-index)
+  (geiser-kawa-eval--to-res
+   `(geiser:complete-java-show-expr-tree
+     ,code-str
+     ,cursor-index)))
+
+(defun geiser-kawa-complete-fmp-at-point-exprtree ()
+  (interactive)
+  (let* ((code-and-point-data
+          (geiser-kawa-complete-fmp--code-point-from-toplevel))
+         (code-str     (cdr (assoc "code-str"
+                                   code-and-point-data)))
+         (cursor-index (cdr (assoc "cursor-index"
+                                   code-and-point-data)))
+         (expr-tree (geiser-kawa-complete-fmp--exprtree
+                     code-str cursor-index)))
+    (geiser-kawa-exprtree--view expr-tree)))
+
+
 (provide 'geiser-kawa-complete-java)
 
-;;; geiser-kawa-complete-java.el ends here
+;;; geiser-kawa-complete-fmp.el ends here
