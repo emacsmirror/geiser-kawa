@@ -1,3 +1,5 @@
+;;; geiser-kawa-devutil-complete.el --- completion using kawa-devutil -*- lexical-binding:t -*-
+
 ;; Copyright (C) 2020 spellcard199 <spellcard199@protonmail.com>
 
 ;; This program is free software; you can redistribute it and/or

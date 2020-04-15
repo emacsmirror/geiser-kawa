@@ -1,3 +1,5 @@
+;;; geiser-kawa-util.el --- utility functions for `geiser-kawa' -*- lexical-binding:t -*-
+
 ;; Copyright (C) 2020 spellcard199 <spellcard199@protonmail.com>
 
 ;; This program is free software; you can redistribute it and/or

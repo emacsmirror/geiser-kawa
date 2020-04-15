@@ -1,3 +1,5 @@
+;;; test-geiser-kawa.el --- tests for `geiser-kawa's elisp side -*- lexical-binding:t -*-
+
 ;; Copyright (C) 2019, 2020 spellcard199 <spellcard199@protonmail.com>
 
 ;; This program is free software; you can redistribute it and/or
