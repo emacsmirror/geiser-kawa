@@ -114,19 +114,3 @@ geiser-kawa VS geiser-kawa-scheme - recap table:
 |--------------------------------+-----------------+--------------------|
 | Kawa side written with         | Kawa's Java API | Kawa Scheme        |
 | I'm going to add more features | Probably yes    | Probably not       |
-
-** Cask issue with geiser
-
-If you use geiser as a dependency in a Cask project, Cask eagerly expands the =define-geiser-implementation= macro with =load-file-name= having the wrong value. The result is that geiser implementations in geiser do not work when geiser is managed as a dependency by Cask.
-
-Link to the issue I've opened in Cask: [[https://github.com/cask/cask/issues/472]].
-
-As a (temporary?) workaround, geiser-kawa.el quotes =define-geiser-implementation= and wraps it an =eval= form, and that avoids:
-1. macro expansion to happen during cask-cli.el execution
-2. =load-file-name= having the wrong value of =<path-to-cask-cli.el>= instead of =<path-to-geiser-impl.el>=
-As a side effect, using =(require 'geiser-kawa)= instead of =(require geiser)= also fixes the problem for the other implementations, but for this I don't understand why.
-
-To summarize:
-1. geiser-kawa depends on geiser
-2. geiser as a dependency does not work with Cask (or vice-versa)
-3. If in the emacs instance started with =cask emacs= you use =(require 'geiser-kawa)= instead of =(require 'geiser)=, geiser-kawa.el chain-requires geiser and (for some reason I don't understand) other geiser implementations start working

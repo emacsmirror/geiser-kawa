@@ -12,7 +12,7 @@
 ;; Maintainer: spellcard199 <spellcard199@protonmail.com>
 ;; Keywords: languages, kawa, scheme, geiser
 ;; Homepage: https://gitlab.com/spellcard199/geiser-kawa
-;; Package-Requires: ((emacs "26.1") (geiser "20191025.650"))
+;; Package-Requires: ((emacs "26.1") (geiser "20200406.1104"))
 ;; Version: 0.0.1
 
 ;; This file is NOT part of GNU Emacs.
@@ -398,35 +398,30 @@ Argument MOD is passed by geiser, but it's not used here."
 
 ;;; Implementation definition:
 
-(eval
- ;; (temporary?) Workaround for Cask issue. Wrapping
- ;; `define-geiser-implementation' with `eval' avoids issue
- ;; https://github.com/cask/cask/issues/472 in projects that depend on
- ;; geiser-kawa.
- '(define-geiser-implementation kawa
-    (unsupported-procedures '(find-file
-                              symbol-location
-                              module-location
-                              symbol-documentation
-                              module-exports
-                              callers
-                              callees
-                              generic-methods))
-    (binary geiser-kawa--binary)
-    (arglist geiser-kawa--parameters)
-    (version-command geiser-kawa--version-command)
-    (repl-startup geiser-kawa--repl-startup)
-    (prompt-regexp geiser-kawa--prompt-regexp)
-    (debugger-prompt-regexp nil)
-    (marshall-procedure geiser-kawa--geiser-procedure)
-    ;; TODO
-    ;; (find-module geiser-kawa--find-module nil)
-    (exit-command geiser-kawa--exit-command)
-    (import-command geiser-kawa--import-command)
-    (find-symbol-begin geiser-kawa--symbol-begin)
-    (display-error geiser-kawa--display-error)
-    (case-sensitive nil)
-    (external-help geiser-kawa--manual-look-up)))
+(define-geiser-implementation kawa
+  (unsupported-procedures '(find-file
+                            symbol-location
+                            module-location
+                            symbol-documentation
+                            module-exports
+                            callers
+                            callees
+                            generic-methods))
+  (binary geiser-kawa--binary)
+  (arglist geiser-kawa--parameters)
+  (version-command geiser-kawa--version-command)
+  (repl-startup geiser-kawa--repl-startup)
+  (prompt-regexp geiser-kawa--prompt-regexp)
+  (debugger-prompt-regexp nil)
+  (marshall-procedure geiser-kawa--geiser-procedure)
+  ;; TODO
+  ;; (find-module geiser-kawa--find-module nil)
+  (exit-command geiser-kawa--exit-command)
+  (import-command geiser-kawa--import-command)
+  (find-symbol-begin geiser-kawa--symbol-begin)
+  (display-error geiser-kawa--display-error)
+  (case-sensitive nil)
+  (external-help geiser-kawa--manual-look-up))
 
 (geiser-impl--add-to-alist 'regexp "\\.scm$" 'kawa t)
 (geiser-impl--add-to-alist 'regexp "\\.sld$" 'kawa t)
