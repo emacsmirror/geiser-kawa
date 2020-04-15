@@ -12,7 +12,7 @@
 ;; Maintainer: spellcard199 <spellcard199@protonmail.com>
 ;; Keywords: languages, kawa, scheme, geiser
 ;; Homepage: https://gitlab.com/spellcard199/geiser-kawa
-;; Package-Requires: ((emacs "26.1") (geiser "20200406.1104"))
+;; Package-Requires: ((emacs "26.1") (geiser "0.11.2"))
 ;; Version: 0.0.1
 
 ;; This file is NOT part of GNU Emacs.
