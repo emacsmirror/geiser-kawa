@@ -3,23 +3,23 @@
  * This is free software;  for terms and warranty disclaimer see ./COPYING.
  */
 
-package kawageiser.exprtree;
+package kawageiser.kawadevutil;
 
 import gnu.expr.Language;
 import gnu.mapping.Environment;
-import kawadevutil.ast.AstElemWrapper;
+import kawadevutil.exprtree.ExprWrap;
 
 import java.io.IOException;
 
 public class ExprTree {
 
-    public static AstElemWrapper
+    public static ExprWrap
     getExprTree(String codeStr, Language lang, Environment env)
             throws IOException {
-        return new kawadevutil.ast.AstElemWrapper(codeStr, lang, env);
+        return new ExprWrap(codeStr, lang, env);
     }
 
-    public static AstElemWrapper
+    public static ExprWrap
     getExprTree(String codeStr) throws IOException {
         return getExprTree(codeStr, Language.getDefaultLanguage(), Environment.user());
     }

@@ -36,8 +36,8 @@
 (require 'info-look)
 (require 'cl)
 
-(require 'geiser-kawa-complete-java)
-(require 'geiser-kawa-exprtree)
+(require 'geiser-kawa-devutil-complete)
+(require 'geiser-kawa-devutil-exprtree)
 
 ;;; Code:
 

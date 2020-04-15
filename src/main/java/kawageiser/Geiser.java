@@ -6,7 +6,7 @@
 package kawageiser;
 
 import gnu.expr.Language;
-import kawadevutil.complete.java.data.CompletionDataForJavaPackage;
+import kawadevutil.complete.find.packagemembers.CompletionFindPackageMemberUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,18 +38,19 @@ public class Geiser implements Runnable {
         procMap.put("geiser:load-file", "kawageiser.GeiserLoadFile:loadFile");
         procMap.put("geiser:completions", "kawageiser.GeiserCompleteSymbol:getCompletions");
         procMap.put("geiser:no-values", "kawageiser.GeiserNoValues:noValues");
-        procMap.put("geiser:complete-java", "kawageiser.java.GeiserCompleteJava:completeJava");
-        procMap.put("geiser:complete-java-show-expr-tree", "kawageiser.java.GeiserCompleteJava:getExprTreeFormatted");
+        procMap.put("geiser:complete-java", "kawageiser.kawadevutilcompletion.Complete:completeJava");
+        procMap.put("geiser:complete-java-show-expr-tree", "kawageiser.kawadevutilcompletion.Complete:getExprTreeFormatted");
         procMap.put("geiser:manual-epub-unzip-to-tmp-dir", "kawageiser.docutil.ManualEpubUnzipToTmpDir:unzipToTmpDir");
         procMap.put("geiser:macroexpand", "kawageiser.GeiserMacroexpand:expand");
-        procMap.put("geiser:expr-tree-formatted", "kawageiser.exprtree.ExprTree:getExprTreeFormatted");
+        procMap.put("geiser:expr-tree-formatted", "kawageiser.kawadevutil.ExprTree:getExprTreeFormatted");
 
         try {
             if (lang.lookup("geiser:eval") == null) {
                 // Tell kawadevutil to build package cache, which takes a couple of seconds,
                 // in a separate thread, so user doesn't have to wait later.
-                new Thread(
-                        () -> CompletionDataForJavaPackage.getChildrenNamesOfRoot(true)
+                new Thread(() ->
+                        CompletionFindPackageMemberUtil
+                                .getChildrenNamesOfRoot(true)
                 ).start();
 
                 // The reason for this if block is that if someone re-imported this module
@@ -69,7 +70,9 @@ public class Geiser implements Runnable {
         }
     }
 
-    public void kawaDefineFunction(Language lang, String procName, String methodPathAsKawaCode) throws Throwable {
+    public void
+    kawaDefineFunction(Language lang, String procName, String methodPathAsKawaCode)
+            throws Throwable {
         // Using lang.eval is a workaround to the fact I don't know
         // how to create a working PrimProcedure using Kawa's java api.
         Object proc = lang.eval(methodPathAsKawaCode);

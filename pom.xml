@@ -55,6 +55,14 @@
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
         </repository>
     </repositories>
 
@@ -63,7 +71,7 @@
         <dependency>
             <groupId>com.gitlab.spellcard199</groupId>
             <artifactId>kawa-devutil</artifactId>
-            <version>8e0eefcee1e7cd12d6929cbecd2584f8fc5bca2e</version>
+            <version>4d17babf5483a7e292caf1edd3a36d5a952366df</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.testng/testng -->
