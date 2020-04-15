@@ -38,8 +38,8 @@ public class Geiser implements Runnable {
         procMap.put("geiser:load-file", "kawageiser.GeiserLoadFile:loadFile");
         procMap.put("geiser:completions", "kawageiser.GeiserCompleteSymbol:getCompletions");
         procMap.put("geiser:no-values", "kawageiser.GeiserNoValues:noValues");
-        procMap.put("geiser:complete-java", "kawageiser.kawadevutilcompletion.Complete:completeJava");
-        procMap.put("geiser:complete-java-show-expr-tree", "kawageiser.kawadevutilcompletion.Complete:getExprTreeFormatted");
+        procMap.put("geiser:complete-java", "kawageiser.kawadevutil.Complete:completeJava");
+        procMap.put("geiser:complete-java-show-expr-tree", "kawageiser.kawadevutil.Complete:getExprTreeFormatted");
         procMap.put("geiser:manual-epub-unzip-to-tmp-dir", "kawageiser.docutil.ManualEpubUnzipToTmpDir:unzipToTmpDir");
         procMap.put("geiser:macroexpand", "kawageiser.GeiserMacroexpand:expand");
         procMap.put("geiser:expr-tree-formatted", "kawageiser.kawadevutil.ExprTree:getExprTreeFormatted");
