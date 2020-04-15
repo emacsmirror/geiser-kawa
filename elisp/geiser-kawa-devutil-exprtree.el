@@ -23,14 +23,15 @@
 
 (defun geiser-kawa-devutil-exprtree--for-expression (code-str)
   (geiser-kawa-util--eval-to-res
-   `(geiser:expr-tree-formatted ,code-str)))
+   `(geiser:kawa-devutil-expr-tree-formatted ,code-str)))
 
 (defun geiser-kawa-devutil-exprtree-sexp ()
   (interactive)
   "If region is active send region, otherwise send last expression."
   (let* ((code-str
           (if (region-active-p)
-              (buffer-substring-no-properties (region-beginning) (region-end))
+              (buffer-substring-no-properties (region-beginning)
+                                              (region-end))
             (save-excursion
               (let ((sexp-beg (progn (backward-sexp) (point)))
                     (sexp-end (progn (forward-sexp) (point))))

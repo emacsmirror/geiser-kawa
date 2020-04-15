@@ -24,7 +24,7 @@ at the end.")
           ;; takes a string instead of a form.
           (format "(geiser:eval (interaction-environment) %S)"
                   (format "%S"
-                          `(geiser:complete-java
+                          `(geiser:kawa-devutil-complete
                             ,code-str
                             ,cursor-index))))
          (geiser-answer (geiser-eval--send/wait
@@ -194,7 +194,7 @@ at the end.")
 
 (defun geiser-kawa-devutil-complete--exprtree (code-str cursor-index)
   (geiser-kawa-util--eval-to-res
-   `(geiser:complete-java-show-expr-tree
+   `(geiser:kawa-devutil-complete-expr-tree
      ,code-str
      ,cursor-index)))
 
