@@ -25,16 +25,35 @@ Write tests for these:
 
 There are still obvious bugs that need to be fixed before the quality of the package becomes sufficient for melpa.
 
-As of 2020-3-21 using =geiser-kawa= as a dependency for another Cask project using the following recipe seems work. Adapt it to melpa syntax when the package is ready.
+I tried to make a melpa recipe and it seems to work. Here are the instructions to reproduce it.
+
+#+BEGIN_SRC shell
+git clone "https://github.com/melpa/melpa.git"
+cd melpa
+emacs make sandbox
+#+END_SRC
+
+Create new a new recipe file =recipes/geiser-kawa= and insert these contents:
 
 #+BEGIN_SRC emacs-lisp
-(depends-on "geiser-kawa"
-            :git "git@gitlab.com:spellcard199/geiser-kawa.git"
-            :branch "master"
-            :files ("elisp/*.el"
-                    "pom.xml" ".mvn" "mvnw" "mvnw.cmd"
-                    "src"))
+(geiser-kawa
+ :fetcher gitlab
+ :repo "spellcard199/geiser-kawa"
+ :files ("elisp/*.el"
+         "pom.xml"
+         ".mvn" "mvnw" "mvnw.cmd"
+         "src"))
 #+END_SRC
+
+Test that it works:
+1. Install package:
+     1. use =C-cC-c= inside =geiser-kawa='s recipe buffer
+     2. follow instructions
+2. Load =geiser-kawa=:
+  : (require 'geiser-kawa)
+3. Use included Kawa to avoid confounding fators related to availability or version of Kawa:
+  : (setq geiser-kawa-use-included-kawa t)
+4. =run-kawa=
 
 ** Check if Kawa, Emacs and Geiser work on Windows. If yes, make the elisp function wrapping maven wrapper run =mvnw.cmd= instead of =mvnw= when on Windows
 ** Add geiser-kawa-java-find-pc (package or class)
