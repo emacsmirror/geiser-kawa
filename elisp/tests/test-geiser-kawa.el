@@ -24,7 +24,7 @@
 
   (print "[test-geiser-kawa.el] Running `mvnw package'...")
 
-  (let ((mvn-buf (geiser-kawa-deps-mvn-package)))
+  (let ((mvnw-buf (geiser-kawa-deps-mvnw-package geiser-kawa-dir)))
     (while compilation-in-progress
       (sleep-for 0 250)))
 
@@ -44,7 +44,8 @@
 
  (it "can `run-kawa'"
      (expect
-      (get-buffer "* Kawa REPL *")))
+      (process-live-p (get-buffer-process
+                       (get-buffer "* Kawa REPL *")))))
 
  (it "can `geiser-eval-buffer'"
      (expect

@@ -19,4 +19,4 @@
 
 (add-hook 'compilation-finish-functions
           #'run-kawa-after-compilation-finishes)
-(geiser-kawa-deps-mvn-package)
+(geiser-kawa-deps-mvnw-package)

@@ -7,20 +7,38 @@
 ;; have received a copy of the license along with this program. If
 ;; not, see <http://www.xfree86.org/3.3.6/COPYRIGHT2.html#5>.
 
+
+;;; Commentary:
+;; Provide completions using kawa-devutil.  Compared to the way plain
+;; geiser provides completion this has advantages and disadvantages.
+;; - disadvantages:
+;;     - _code sent must be syntactically correct_
+;;     - often just doesn't find completions
+;;     - slower
+;; - just 1 advantage: can complete also (when it works):
+;;     - members of classes (Methods, Fields)
+;;     - members of packages (Classes, other Packages)
+
 (require 'subr-x)
 (require 'geiser-kawa-devutil-exprtree)
 (require 'geiser-kawa-util)
 
+;;; Code:
+
 (defvar geiser-kawa-devutil-complete-add-missing-parentheses
   nil
-  "If true, when completing with kawa-devutil we don't check
-for missing parentheses and just let kawa-devutil append them
-at the end.")
+  "Silence error when missing parentheses or not.
+If true just let kawa-devutil append missing parentheses at the end.")
 
 (defun geiser-kawa-devutil-complete--get-data (code-str cursor-index)
-  "`code' is a string containing the code. It must be syntatically
-  scheme, including balanced parentheses.
-`cursor' is an integer representing where the cursor is in that code."
+  "Get completion data.
+Argument CODE-STR is a string containing the code where completion
+must happen.  It must be syntactically correct Kawa scheme.
+Argument CURSOR-INDEX is an integer representing where the cursor is
+inside `CURSOR-STR'."
+  ;; "`code-str' is a string containing the code.
+;; It must be syntatically scheme, including balanced parentheses.
+;; `cursor-index' is an integer representing where the cursor is in that code."
   (let* ((geiser-question
           ;; this formatting hell is caused by the fact geiser:eval
           ;; takes a string instead of a form.
@@ -43,7 +61,10 @@ at the end.")
 
 (defun geiser-kawa-devutil-complete--user-choice-classmembers
     (classmember-data)
+  "Read completion choice for members of class (Methods and Fields).
 
+Argument CLASSMEMBER-DATA is completion data for members of class as
+returned by kawa-geiser."
   (let* ((completion-type
           (cadr (assoc "completion-type" classmember-data)))
          (before-cursor
@@ -62,13 +83,16 @@ at the end.")
                   (string-join modifiers " ") " " completion-type
                   ") "
                   owner-class ".")))
-
     (completing-read prompt names
                      nil nil
                      before-cursor)))
 
 (defun geiser-kawa-devutil-complete--user-choice-symbols-plus-packagemembers
     (syms-plus-pkgmembers-data)
+  "Read completion choice for members of class (Methods and Fields).
+
+Argument SYMS-PLUS-PKGMEMBERS-DATA is completion data for symbols and
+members of package as returned by kawa-geiser."
   (let* ((completion-type
           (cadr (assoc "completion-type" syms-plus-pkgmembers-data)))
          (before-cursor
@@ -107,6 +131,7 @@ at the end.")
 
 (defun geiser-kawa-devutil-complete--user-choice-dispatch
     (compl-data)
+  "Dispatch COMPL-DATA to appropriate function based on \"completion-type\"."
   (let ((completion-type
          (cadr (assoc "completion-type" compl-data))))
     (cond ((or (equal completion-type "METHODS")
@@ -119,10 +144,10 @@ at the end.")
 	   (message "No completions found.")
 	   "")
           (t (error (format "[Unexpected `completion-type' value] completion-type: %s"
-                            (prin1-to-string completion-type))))
-          )))
+                            (prin1-to-string completion-type)))))))
 
 (defun geiser-kawa-devutil-complete--code-point-from-toplevel ()
+  "Return an association list of data needed for completion."
   (let* (reg-beg
          reg-end
          code-str
@@ -169,8 +194,10 @@ at the end.")
      `("cursor-index" . ,cursor-index))))
 
 (defun geiser-kawa-devutil-complete-at-point ()
+  "Complete at point using `kawa-devutil'.
+`kawa-devutil' is a java dependency of `kawa-geiser', itself a java
+dependency of `geiser-kawa'."
   (interactive)
-  "Complete at point using kawa-devutil's completion."
 
   (let* ((code-and-point-data
           (geiser-kawa-devutil-complete--code-point-from-toplevel))
@@ -187,7 +214,7 @@ at the end.")
           (kill-word 1)
         (kill-word -1)))
     (insert user-choice)
-    ;; (when (not (equal (word-at-point) user-choice))
+    ;; (unless (equal (word-at-point) user-choice)
     ;;   (kill-word 1)
     ))
 
@@ -195,12 +222,26 @@ at the end.")
 ;;;; java completions. Useful when debugging why java completion fails.
 
 (defun geiser-kawa-devutil-complete--exprtree (code-str cursor-index)
+  "Return Expression tree for kawa-devutil completion.
+
+To find completions kawa-devutil modifies slightly the code you send
+to it and then uses a simple pattern matching mechanism on the
+Expression tree that Kawa compiler generates.  Sometimes things don't
+work and you may wonder why and viewing the generated Expression tree
+can help understand wether the problem is your code or kawa-devutil
+itself (I mostly use this to find problems in kawa-devutil itself).
+
+Argument CODE-STR is a string containing the code where completion
+must happen.  It must be syntactically correct Kawa scheme.
+Argument CURSOR-INDEX is an integer representing where the cursor is
+inside `CURSOR-STR'."
   (geiser-kawa-util--eval-to-res
    `(geiser:kawa-devutil-complete-expr-tree
      ,code-str
      ,cursor-index)))
 
 (defun geiser-kawa-devutil-complete-expree-at-point ()
+  "View Expression tree for kawa-devutil completion at point."
   (interactive)
   (let* ((code-and-point-data
           (geiser-kawa-devutil-complete--code-point-from-toplevel))

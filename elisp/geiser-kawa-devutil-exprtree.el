@@ -7,12 +7,22 @@
 ;; have received a copy of the license along with this program. If
 ;; not, see <http://www.xfree86.org/3.3.6/COPYRIGHT2.html#5>.
 
+;;; Commentary:
+;; The Kawa language framework compilation works producing converting
+;; code into an Expression tree and then compiling the latter into
+;; Java bytecode.
+;; Here are some functions for getting and viewing the Expression tree
+;; that Kawa produces for some given code.
+
 (require 'geiser-kawa-util)
 
+;;; Code:
+
 (defvar geiser-kawa-devutil-exprtree-buffer "*kawa exprtree*"
-  "Buffer where Expression tree is showed")
+  "Buffer where Expression tree is showed.")
 
 (defun geiser-kawa-devutil-exprtree--view (expr-tree)
+  "View EXPR-TREE in a buffer in View-mode."
   (with-current-buffer (get-buffer-create
                         geiser-kawa-devutil-exprtree-buffer)
     (View-quit)
@@ -24,12 +34,13 @@
    geiser-kawa-devutil-exprtree-buffer))
 
 (defun geiser-kawa-devutil-exprtree--for-expression (code-str)
+  "Get the Expression tree CODE-STR."
   (geiser-kawa-util--eval-to-res
    `(geiser:kawa-devutil-expr-tree-formatted ,code-str)))
 
 (defun geiser-kawa-devutil-exprtree-sexp ()
-  (interactive)
   "If region is active send region, otherwise send last expression."
+  (interactive)
   (let* ((code-str
           (if (region-active-p)
               (buffer-substring-no-properties (region-beginning)

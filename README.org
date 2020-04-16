@@ -61,7 +61,7 @@ Only versions of Kawa > 3.1 are supported, mostly due to the fact that before th
 
 To try geiser-kawa you need neither Maven nor Kawa:
 - =mvnw= ([[https://github.com/takari/maven-wrapper][maven-wrapper]]) takes care of downloading a project-specific Maven version
-- kawa-geiser has [[https://gitlab.com/groups/kashell/][Kawa's master branch]] as one of its dependencies. When =quickstart.el= calls =./mvnw package= (wrapped by =geiser-kawa-deps-mvn-package=), it produces a jar that includes kawa-geiser and all its dependencies, including Kawa itself.
+- kawa-geiser has [[https://gitlab.com/groups/kashell/][Kawa's master branch]] as one of its dependencies. When =quickstart.el= calls =./mvnw package= (wrapped by =geiser-kawa-deps-mvnw-package=), it produces a jar that includes kawa-geiser and all its dependencies, including Kawa itself.
 
 ** About completion for java's fields, methods and packages
 :PROPERTIES:

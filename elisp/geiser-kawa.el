@@ -36,8 +36,11 @@
 (require 'info-look)
 (require 'cl)
 
+(require 'geiser-kawa-deps)
 (require 'geiser-kawa-devutil-complete)
 (require 'geiser-kawa-devutil-exprtree)
+(require 'geiser-kawa-arglist)
+(require 'geiser-kawa-ext-help)
 
 ;;; Code:
 
@@ -56,7 +59,7 @@
   (if (string-suffix-p "elisp/" geiser-kawa-elisp-dir)
       (expand-file-name "../" geiser-kawa-elisp-dir)
     geiser-kawa-elisp-dir)
-  "geiser-kawa's directory.")
+  "Directory where geiser-kawa is located.")
 
 ;; Adapted from geiser.el
 (custom-add-load 'geiser-kawa (symbol-name 'geiser-kawa))
@@ -74,66 +77,6 @@
 (add-to-list 'geiser-active-implementations 'kawa)
 
 ;; End of adaptations for making this package separate from geiser
-
-
-;; Using `mvn package' from the pom.xml's directory should produce a
-;; jar containing all the java dependencies.
-(defcustom geiser-kawa-deps-jar-path
-  (expand-file-name
-   "./target/kawa-geiser-0.1-SNAPSHOT-jar-with-dependencies.jar"
-   geiser-kawa-dir)
-  "Path to the kawa-geiser fat jar."
-  :type 'string
-  :group 'geiser-kawa)
-
-;; Download, compile and package "kawa-geiser" and its recursive
-;; dependencies into a fat jar.
-(defun geiser-kawa-deps-mvn-package()
-  (interactive)
-  (let* ((default-directory geiser-kawa-dir)
-         (mvn-buf (compile "./mvnw package")))
-    (when mvn-buf
-      (let ((save-buf (current-buffer)))
-        (switch-to-buffer-other-window mvn-buf)
-        (end-of-buffer)
-        (switch-to-buffer-other-window save-buf)))))
-
-(defun geiser-kawa--deps-run-kawa--advice-add()
-  (add-function :override
-                (symbol-function 'run-kawa)
-                #'geiser-kawa--deps-run-kawa-advice))
-
-(defun geiser-kawa--deps-run-kawa--advice-remove()
-  (remove-function (symbol-function 'run-kawa)
-                   #'geiser-kawa--deps-run-kawa-advice))
-
-(defun geiser-kawa--deps-run-kawa-unadviced()
-  (geiser-kawa--deps-run-kawa--advice-remove)
-  (run-kawa)
-  (geiser-kawa--deps-run-kawa--advice-add))
-
-(defun geiser-kawa--deps-run-kawa--add-compil-hook()
-  ;; The added hook auto-removes itself after being called once.
-  (add-hook 'compilation-finish-functions
-            #'geiser-kawa--deps-run-kawa-remove-compil-hook))
-
-(defun geiser-kawa--deps-run-kawa-remove-compil-hook(buf desc)
-  ;; Removes itself from `compilation-finish-functions'
-  ;; when called.
-  (geiser-kawa--deps-run-kawa-unadviced)
-  (remove-hook 'compilation-finish-functions
-               #'geiser-kawa--deps-run-kawa-remove-compil-hook))
-
-(defun geiser-kawa--deps-run-kawa-advice(&optional install-if-absent)
-  (if (file-exists-p geiser-kawa-deps-jar-path)
-      (geiser-kawa--deps-run-kawa-unadviced)
-    (when (or install-if-absent
-              (y-or-n-p
-               (concat
-                "geiser-kawa depends on additional java libraries. "
-                "Do you want to download and compile them now?")))
-      (geiser-kawa--deps-run-kawa--add-compil-hook)
-      (geiser-kawa-deps-mvn-package))))
 
 
 ;;; Customization:
@@ -160,67 +103,31 @@
   :type 'string
   :group 'geiser-kawa)
 
+(defcustom geiser-kawa-deps-jar-path
+  (geiser-kawa-deps--jar-path geiser-kawa-dir)
+  "Path to the kawa-geiser fat jar."
+  :type 'string
+  :group 'geiser-kawa)
+
 (defcustom geiser-kawa-use-included-kawa
   nil
-  "Instead of downloading kawa yourself, you can use the Kawa version
- included in geiser-kawa, which is the head of Kawa's master branch."
+  "Use the Kawa included with `geiser-kawa' instead of the `kawa' binary.
+
+Instead of downloading kawa yourself, you can use the Kawa version
+included in `geiser-kawa'."
   :type 'boolean
   :group 'geiser-kawa)
 
 
 ;;; REPL support:
 
-(defun geiser-kawa--binary ()
-  ". If `geiser-kawa-binary' is a list, take the first and ignore
- `geiser-kawa-use-included-kawa'."
-  (if geiser-kawa-use-included-kawa
-      "java"
-    (if (listp geiser-kawa-binary)
-        (car geiser-kawa-binary)
-      geiser-kawa-binary)))
-
-(defun geiser-kawa--make-classpath ()
-  (let ((jars
-         (append
-          (if (and
-               (not geiser-kawa-use-included-kawa)
-               (executable-find geiser-kawa-binary))
-              (let ((lib-dir (expand-file-name
-                              "../lib/"
-                              (file-name-directory
-                               (executable-find geiser-kawa-binary)))))
-                (if (file-directory-p lib-dir)
-                    (list
-                     (concat lib-dir "kawa.jar")
-                     (concat lib-dir "servlet.jar")
-                     (concat lib-dir "domterm.jar")
-                     (concat lib-dir "jline.jar"))
-                  nil))
-            nil)
-          (list geiser-kawa-deps-jar-path))))
-    (mapconcat #'identity jars ":")))
-
-(defvar geiser-kawa--arglist
-  `(;; jline "invisibly" echoes user input and prints ansi chars that
-    ;; makes harder detecting end of output and finding the correct
-    ;; prompt regexp.
-    "console:use-jline=no"
-    "-e"
-    "(require <kawageiser.Geiser>)"
-    "--"))
-
-(defun geiser-kawa--parameters ()
-  "Return a list with all parameters needed to start Kawa Scheme."
-  (append
-   (list (format "-Djava.class.path=%s" (geiser-kawa--make-classpath)))
-   (if geiser-kawa-use-included-kawa
-       (list "kawa.repl"))
-   geiser-kawa--arglist))
-
 (defconst geiser-kawa--prompt-regexp
   "#|kawa:[0-9]+|# ")
 
 (defun geiser-kawa--geiser-procedure (proc &rest args)
+  "Geiser's marshall-procedure for `geiser-kawa'.
+Argument PROC passed by Geiser.
+Optional argument ARGS passed by Geiser."
 
   (case proc
     ((eval compile)
@@ -248,27 +155,48 @@
 ;;  (save-excursion (skip-syntax-backward "^|#") (point)))
 ;; TODO: see if it needs improvements.
 (defun geiser-kawa--symbol-begin (module)
-  ;; Needed for completion. Copied from geiser-chibi.el,
-  ;; geiser-guile.el, which are identical to each other.
+  "Needed for completion.
+Copied from geiser-chibi.el, geiser-guile.el, which are identical to
+each other.
+Argument MODULE argument passed by Geiser."
   (if module
       (max (save-excursion (beginning-of-line) (point))
            (save-excursion (skip-syntax-backward "^(>") (1- (point))))
     (save-excursion (skip-syntax-backward "^'-()>") (point))))
 
 (defun geiser-kawa--import-command (module)
+  "Return command used to import MODULEs."
   (format "(import %s)" module))
 
 (defun geiser-kawa--exit-command ()
+  "Command to send to exit from Kawa REPL."
   "(exit 0)")
 
 
 ;;; REPL startup
 
 (defun geiser-kawa--version-command (binary)
-  (let ((prog+vers (car (process-lines binary "--version"))))
-    (cadr (split-string prog+vers " "))))
+  "Return command to get kawa version.
+Argument BINARY argument passed by Geiser."
+  (let* ((program (if geiser-kawa-use-included-kawa
+                      "java"
+                    "kawa"))
+         (args  (if geiser-kawa-use-included-kawa
+                    (list (geiser-kawa-arglist--make-classpath-arg
+                           geiser-kawa-deps-jar-path)
+                          "kawa.repl"
+                          "--version")
+                  (list "--version")))
+         (output (apply #'process-lines
+                        (cons program args)))
+         (progname-plus-version (car output)))
+    ;; `progname-plus-version' is something like:
+    ;; "Kawa 3.1.1"
+    (cadr (split-string progname-plus-version " "))))
 
 (defun geiser-kawa--repl-startup (remote)
+  "Geiser's repl-startup.
+Argument REMOTE passed by Geiser."
   (let ((geiser-log-verbose-p t))
     (compilation-setup t)))
 
@@ -276,124 +204,19 @@
 ;;; Error display
 
 ;; TODO
-(defun geiser-kawa--enter-debugger ())
+(defun geiser-kawa--enter-debugger ()
+  "TODO.")
 
 (defun geiser-kawa--display-error (module key msg)
-  ;; Needed to show output (besides result). Modified from
-  ;; geiser-guile.el.
+  "Needed to show output (besides result).
+Modified from geiser-guile.el.
+Argument MODULE passed by Geiser.
+Argument KEY passed by Geiser.
+Argument MSG passed by Geiser."
   (when (stringp msg)
     (save-excursion (insert msg))
     (geiser-edit--buttonize-files))
   (and (not key) (not (zerop (length msg))) msg))
-
-
-;;; Manual lookup
-
-;;;; Support for manual in .epub format
-
-(cl-defun geiser-kawa--manual-epub-unzip-to-tmpdir
-    (&optional (epub-path geiser-kawa-manual-path))
-  "Unzip the .epub file with kawa/java, since:
-- kawa is already a dependency
-- kawa/java is more portable that using emacs' arc-mode, which relies
-  on external executables installed"
-  (with-temp-buffer
-    (with--geiser-implementation
-        'kawa
-      (geiser-eval--send/result
-       (format
-        "(geiser:eval (interaction-environment) %S)"
-        (format "(geiser:manual-epub-unzip-to-tmp-dir %S)"
-                epub-path))))))
-
-(defvar geiser-kawa--manual-epub-cached-overall-index
-  nil
-  "Since `eww-open-file' is slow we use it just the first time.
-Then we cache the result in this variable so that future lookups in
-the manual are more responsive.")
-
-(cl-defun geiser-kawa--manual-epub-search
-    (needle &optional (epub-path geiser-kawa-manual-path))
-  ;; Validate args
-  (assert (stringp needle) nil (type-of needle))
-  (assert (stringp epub-path) nil (type-of epub-path))
-  (assert (string-suffix-p ".epub" epub-path) nil epub-path)
-  (assert (file-exists-p epub-path) nil epub-path)
-
-  (with-current-buffer (get-buffer-create
-                        " *geiser-kawa-epub-manual*")
-    (eww-mode)
-    (if geiser-kawa--manual-epub-cached-overall-index
-        (progn
-          (read-only-mode -1)
-          (delete-region (point-min) (point-max))
-          (insert geiser-kawa--manual-epub-cached-overall-index))
-      (let* ((unzipped-epub-dir
-              ;; Ask kawa to unzip epub: more portable than unzipping
-              ;; with emacs' `arc-mode'.
-              (geiser-kawa--manual-epub-unzip-to-tmpdir epub-path))
-             (overall-index-file
-              (format "%s/OEBPS/Overall-Index.xhtml" unzipped-epub-dir))
-             (epub-man-buffer
-              (get-buffer-create "*geiser-kawa-epub-manual*")))
-        (when (not unzipped-epub-dir)
-          (error "Can't open manual: Kawa did not unzip the epub when asked."))
-        (eww-open-file overall-index-file)
-        ;; Store overall index page in a variable to be used as cache.
-        (setq geiser-kawa--manual-epub-cached-overall-index (buffer-string))))
-
-    ;; At this point the Overall Index page should be opened.
-    (goto-char (point-min))
-    (if (search-forward (concat "\n" needle ": ") nil t) ;; Search
-        (progn
-          (backward-char 3) ;; Move point over link
-          (eww-browse-url (car (eww-links-at-point))) ;; Follow link
-          (recenter-top-bottom 'top))
-      (message (format "No match for `%s' found in Kawa's epub manual." needle)))))
-
-;;;; Support for manual in .info format
-(cl-defun geiser-kawa--manual-info-search
-    (needle &optional (info-path geiser-kawa-manual-path))
-
-  ;; Validate args
-  (assert (stringp needle) nil (type-of needle))
-  (assert (stringp info-path) nil (type-of info-path))
-  (assert (string-suffix-p ".info" info-path) nil info-path)
-  (assert (file-exists-p info-path) nil info-path)
-
-  (with-current-buffer (get-buffer-create "*geiser-kawa-info-manual*")
-    (info info-path (current-buffer))
-    (Info-goto-node "Overall Index")
-    (if (search-forward (concat "\n* " needle) nil t)
-        (progn
-          (Info-follow-nearest-node)
-          (recenter-top-bottom 'top))
-      (progn
-        (quit-window)
-        (message (format "No match for `%s' found in Kawa's info manual."
-                         needle))))))
-
-;;;; Dispatch to epub or info manual function based on
-;;;; `geiser-kawa-manual-path's file extension.
-(defun geiser-kawa--manual-look-up (id mod)
-  "Use epub or info manual depending on `geiser-kawa-manual-path'.
-
-Argument ID is the symbol to look for in the manual.
-Argument MOD is passed by geiser, but it's not used here."
-  (assert (file-exists-p geiser-kawa-manual-path)
-          nil (format
-               (concat
-                "Kawa's manual file specified by "
-                "`geiser-kawa-manual-path' does not exist: \"%s\"")
-               geiser-kawa-manual-path))
-  (cond
-   ((string-suffix-p ".epub" geiser-kawa-manual-path)
-    (geiser-kawa--manual-epub-search (symbol-name id)
-                                     geiser-kawa-manual-path))
-   ((string-suffix-p ".info" geiser-kawa-manual-path)
-    (geiser-kawa--manual-info-search (symbol-name id)
-                                     geiser-kawa-manual-path))
-   (t (error "Supported formats for `geiser-kawa-manual-path' are only `.epub' and `.info'"))))
 
 
 ;;; Implementation definition:
@@ -408,7 +231,7 @@ Argument MOD is passed by geiser, but it's not used here."
                             callees
                             generic-methods))
   (binary geiser-kawa--binary)
-  (arglist geiser-kawa--parameters)
+  (arglist geiser-kawa-arglist)
   (version-command geiser-kawa--version-command)
   (repl-startup geiser-kawa--repl-startup)
   (prompt-regexp geiser-kawa--prompt-regexp)
@@ -427,7 +250,7 @@ Argument MOD is passed by geiser, but it's not used here."
 (geiser-impl--add-to-alist 'regexp "\\.sld$" 'kawa t)
 
 ;; Check for kawa-geiser jar each time `run-kawa' is called.
-(geiser-kawa--deps-run-kawa--advice-add)
+(geiser-kawa-deps--run-kawa--advice-add)
 
 (provide 'geiser-kawa)
 
