@@ -10,8 +10,11 @@
 ;;; Commentary:
 ;; Some general utility functions used by the `geiser-kawa' package.
 
+(require 'subr-x)
 (require 'geiser-syntax)
 (require 'geiser-eval)
+(require 'geiser-kawa-globals)
+(require 'geiser-repl)
 
 ;; Utility functions used by other parts of `geiser-kawa'.
 

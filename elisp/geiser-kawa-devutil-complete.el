@@ -7,7 +7,6 @@
 ;; have received a copy of the license along with this program. If
 ;; not, see <http://www.xfree86.org/3.3.6/COPYRIGHT2.html#5>.
 
-
 ;;; Commentary:
 ;; Provide completions using kawa-devutil.  Compared to the way plain
 ;; geiser provides completion this has advantages and disadvantages.
@@ -37,8 +36,8 @@ must happen.  It must be syntactically correct Kawa scheme.
 Argument CURSOR-INDEX is an integer representing where the cursor is
 inside `CURSOR-STR'."
   ;; "`code-str' is a string containing the code.
-;; It must be syntatically scheme, including balanced parentheses.
-;; `cursor-index' is an integer representing where the cursor is in that code."
+  ;; It must be syntatically scheme, including balanced parentheses.
+  ;; `cursor-index' is an integer representing where the cursor is in that code."
   (let* ((geiser-question
           ;; this formatting hell is caused by the fact geiser:eval
           ;; takes a string instead of a form.
@@ -62,15 +61,15 @@ inside `CURSOR-STR'."
 (defun geiser-kawa-devutil-complete--user-choice-classmembers
     (classmember-data)
   "Read completion choice for members of class (Methods and Fields).
-
 Argument CLASSMEMBER-DATA is completion data for members of class as
 returned by kawa-geiser."
   (let* ((completion-type
           (cadr (assoc "completion-type" classmember-data)))
          (before-cursor
           (cadr (assoc "before-cursor" classmember-data)))
-         (after-cursor ;; unused
-          (cadr (assoc "after-cursor" classmember-data)))
+         ;; unused
+         ;; (after-cursor
+         ;;  (cadr (assoc "after-cursor" classmember-data)))
          (owner-class
           (cadr (assoc "owner-class" classmember-data)))
          (modifiers
@@ -186,7 +185,6 @@ members of package as returned by kawa-geiser."
         (setq cursor-index (- (point) reg-beg))))
     (setq code-str (buffer-substring-no-properties
                     reg-beg reg-end))
-    (setq moo code-str)
     (list
      `("reg-beg"      . ,reg-beg)
      `("reg-end"      . ,reg-end)

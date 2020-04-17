@@ -1,5 +1,12 @@
 ;;; geiser-kawa-deps.el --- Manage geiser-kawa's java dependencies -*- lexical-binding:t -*-
 
+;; Copyright (C) 2019, 2020 spellcard199 <spellcard199@protonmail.com>
+
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the Modified BSD License. You should
+;; have received a copy of the license along with this program. If
+;; not, see <http://www.xfree86.org/3.3.6/COPYRIGHT2.html#5>.
+
 ;;; Commentary:
 ;; This file contains code related to the download, compilation
 ;; and packaging of `kawa-geiser', the java dependency (with its
@@ -8,17 +15,16 @@
 ;; `mvnw package', which uses the pom.xml for the `kawa-geiser'
 ;; project, included in the `geiser-kawa-dir' directory.
 
+;; Depends on global vars:
+;; `geiser-kawa-dir'
+
 ;;; Code:
 
-(require 'cl)
+(require 'cl-lib)
+(require 'geiser-kawa-globals)
 
-(cl-defun geiser-kawa-deps--jar-path
+(cl-defun geiser-kawa-deps-mvnw-package
     (&optional (geiser-kawa-dir geiser-kawa-dir))
-  (expand-file-name
-   "./target/kawa-geiser-0.1-SNAPSHOT-jar-with-dependencies.jar"
-   geiser-kawa-dir))
-
-(defun geiser-kawa-deps-mvnw-package (geiser-kawa-dir)
   "Download, Compile and Package `geiser-kawa's java dependencies.
 When called, this function runs `mvnw package' from the path specified
 by the variable `GEISER-KAWA-DIR'.
@@ -32,7 +38,7 @@ at REPL startup."
     (when mvn-buf
       (let ((save-buf (current-buffer)))
         (switch-to-buffer-other-window mvn-buf)
-        (end-of-buffer)
+        (goto-char (point-max))
         (switch-to-buffer-other-window save-buf)))))
 
 
@@ -74,8 +80,8 @@ at REPL startup."
 Runs `run-kawa' without the `geiser-kawa-deps--run-kawa--advice'
 advice and removes itself from `compilation-finish-functions',
 effectively running `run-kawa' unadviced only for one compilation.
-Argument BUF passed by Emacs when compilation finishes.
-Argument DESC passed by Emacs when compilation finishes."
+Argument BUF is passed by Emacs when compilation finishes.
+Argument DESC is passed by Emacs when compilation finishes."
   (geiser-kawa-deps--run-kawa-unadviced)
   (remove-hook 'compilation-finish-functions
                #'geiser-kawa-deps--run-kawa--remove-compil-hook))

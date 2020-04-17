@@ -1,32 +1,60 @@
 ;;; geiser-kawa-ext-help.el --- Support for the "external-help" geiser feature -*- lexical-binding:t -*-
 
+;; Copyright (C) 2020 spellcard199 <spellcard199@protonmail.com>
+
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the Modified BSD License. You should
+;; have received a copy of the license along with this program. If
+;; not, see <http://www.xfree86.org/3.3.6/COPYRIGHT2.html#5>.
+
 ;;; Commentary:
 ;; Functions for providing the "external-help" Geiser feature.
 ;; Currently, the external help for Kawa is the kawa manual in either
 ;; its .info or .epub format.  For the feature to work
 ;; `geiser-kawa-manual-path' must point to where the .info or .epub
 ;; Kawa manual is located.
+;; Depends on global variables:
+;; `geiser-kawa-binary'
+
+(require 'cl-lib)
+(require 'geiser-custom)
+(require 'geiser-impl)
+(require 'geiser-eval)
+(require 'eww)
+(require 'info)
+(require 'geiser-kawa-globals)
 
 ;;; Code:
 
 ;; Support for manual in .epub format
+
+(geiser-custom--defcustom
+    geiser-kawa-manual-path
+    (when (executable-find geiser-kawa-binary)
+      (expand-file-name
+       "../doc/kawa-manual.epub"
+       (file-name-directory
+        (executable-find geiser-kawa-binary))))
+  "Path of kawa manual. Supported formats are `.epub' (using
+`eww-mode') and `.info' (using `info.el')."
+  :type 'string
+  :group 'geiser-kawa)
 
 (cl-defun geiser-kawa-manual--epub-unzip-to-tmpdir
     (&optional (epub-path geiser-kawa-manual-path))
   "Unzip the .epub file using kawa/java.
 
 Rationale for using java instead of emacs:
-- kawa is already a dependency
-- kawa/java is more portable that using emacs' `arc-mode', which relies
-  on external executables being installed"
+- Kawa is already a dependency.
+- Kawa/java is more portable that using emacs' `arc-mode',
+  which relies on external executables being installed."
   (with-temp-buffer
-    (with--geiser-implementation
-        'kawa
-      (geiser-eval--send/result
-       (format
-        "(geiser:eval (interaction-environment) %S)"
-        (format "(geiser:manual-epub-unzip-to-tmp-dir %S)"
-                epub-path))))))
+    (geiser-impl--set-buffer-implementation 'kawa)
+    (geiser-eval--send/result
+     (format
+      "(geiser:eval (interaction-environment) %S)"
+      (format "(geiser:manual-epub-unzip-to-tmp-dir %S)"
+              epub-path)))))
 
 (defvar geiser-kawa-manual--epub-cached-overall-index
   nil
@@ -37,10 +65,10 @@ the manual are more responsive.")
 (cl-defun geiser-kawa-manual--epub-search
     (needle &optional (epub-path geiser-kawa-manual-path))
   ;; Validate args
-  (assert (stringp needle) nil (type-of needle))
-  (assert (stringp epub-path) nil (type-of epub-path))
-  (assert (string-suffix-p ".epub" epub-path) nil epub-path)
-  (assert (file-exists-p epub-path) nil epub-path)
+  (cl-assert (stringp needle) nil (type-of needle))
+  (cl-assert (stringp epub-path) nil (type-of epub-path))
+  (cl-assert (string-suffix-p ".epub" epub-path) nil epub-path)
+  (cl-assert (file-exists-p epub-path) nil epub-path)
 
   (with-current-buffer (get-buffer-create
                         " *geiser-kawa-epub-manual*")
@@ -55,9 +83,7 @@ the manual are more responsive.")
               ;; with emacs' `arc-mode'.
               (geiser-kawa-manual--epub-unzip-to-tmpdir epub-path))
              (overall-index-file
-              (format "%s/OEBPS/Overall-Index.xhtml" unzipped-epub-dir))
-             (epub-man-buffer
-              (get-buffer-create "*geiser-kawa-epub-manual*")))
+              (format "%s/OEBPS/Overall-Index.xhtml" unzipped-epub-dir)))
         (unless unzipped-epub-dir
           (error "Can't open manual: Kawa did not unzip the epub when asked"))
         (eww-open-file overall-index-file)
@@ -78,10 +104,10 @@ the manual are more responsive.")
 (cl-defun geiser-kawa-manual--info-search
     (needle &optional (info-path geiser-kawa-manual-path))
   ;; Validate args
-  (assert (stringp needle) nil (type-of needle))
-  (assert (stringp info-path) nil (type-of info-path))
-  (assert (string-suffix-p ".info" info-path) nil info-path)
-  (assert (file-exists-p info-path) nil info-path)
+  (cl-assert (stringp needle) nil (type-of needle))
+  (cl-assert (stringp info-path) nil (type-of info-path))
+  (cl-assert (string-suffix-p ".info" info-path) nil info-path)
+  (cl-assert (file-exists-p info-path) nil info-path)
 
   (with-current-buffer (get-buffer-create "*geiser-kawa-info-manual*")
     (info info-path (current-buffer))
@@ -101,13 +127,13 @@ the manual are more responsive.")
   "Use epub or info manual depending on `geiser-kawa-manual-path'.
 
 Argument ID is the symbol to look for in the manual.
-Argument MOD is passed by geiser, but it's not used here."
-  (assert (file-exists-p geiser-kawa-manual-path)
-          nil (format
-               (concat
-                "Kawa's manual file specified by "
-                "`geiser-kawa-manual-path' does not exist: \"%s\"")
-               geiser-kawa-manual-path))
+Argument MOD is passed by geiser, but it's not used here yet."
+  (cl-assert (file-exists-p geiser-kawa-manual-path)
+             nil (format
+                  (concat
+                   "Kawa's manual file specified by "
+                   "`geiser-kawa-manual-path' does not exist: \"%s\"")
+                  geiser-kawa-manual-path))
   (cond
    ((string-suffix-p ".epub" geiser-kawa-manual-path)
     (geiser-kawa-manual--epub-search (symbol-name id)

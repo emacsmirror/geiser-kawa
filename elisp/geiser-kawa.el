@@ -18,7 +18,6 @@
 ;; This file is NOT part of GNU Emacs.
 
 ;;; Commentary:
-
 ;; geiser-kawa extends the `geiser' package to support the Kawa
 ;; scheme implementation.
 
@@ -34,109 +33,29 @@
 
 (require 'compile)
 (require 'info-look)
-(require 'cl)
+(require 'cl-lib)
 
+(require 'geiser-kawa-globals)
 (require 'geiser-kawa-deps)
 (require 'geiser-kawa-devutil-complete)
 (require 'geiser-kawa-devutil-exprtree)
 (require 'geiser-kawa-arglist)
 (require 'geiser-kawa-ext-help)
 
+
 ;;; Code:
-
-
-;; Adaptations for making this package separate from geiser
-
-;; Adapted from geiser.el
-;;;###autoload
-(defconst geiser-kawa-elisp-dir
-  (file-name-directory (or load-file-name (buffer-file-name)))
-  "Directory containing geiser-kawa's Elisp files.")
-
-;; Adapted from geiser.el
-;;;###autoload
-(defconst geiser-kawa-dir
-  (if (string-suffix-p "elisp/" geiser-kawa-elisp-dir)
-      (expand-file-name "../" geiser-kawa-elisp-dir)
-    geiser-kawa-elisp-dir)
-  "Directory where geiser-kawa is located.")
-
-;; Adapted from geiser.el
-(custom-add-load 'geiser-kawa (symbol-name 'geiser-kawa))
-(custom-add-load 'geiser      (symbol-name 'geiser-kawa))
-
-;; Moved from geiser.el
-;;;###autoload
-(autoload 'run-kawa "geiser-kawa" "Start a Geiser Kawa Scheme REPL." t)
-
-;;;###autoload
-(autoload 'switch-to-kawa "geiser-kawa"
-  "Start a Geiser Kawa Scheme REPL, or switch to a running one." t)
-
-;; `geiser-active-implementations' is defined in `geiser-impl.el'
-(add-to-list 'geiser-active-implementations 'kawa)
-
-;; End of adaptations for making this package separate from geiser
-
-
-;;; Customization:
-
-(defgroup geiser-kawa nil
-  "Customization for Geiser's Kawa Scheme flavour."
-  :group 'geiser)
-
-(geiser-custom--defcustom
-    geiser-kawa-binary "kawa"
-  "Name to use to call the Kawa Scheme executable when starting a REPL."
-  :type '(choice string (repeat string))
-  :group 'geiser-kawa)
-
-(geiser-custom--defcustom
-    geiser-kawa-manual-path
-    (when (executable-find geiser-kawa-binary)
-      (expand-file-name
-       "../doc/kawa-manual.epub"
-       (file-name-directory
-        (executable-find geiser-kawa-binary))))
-  "Path of kawa manual. Supported formats are `.epub' (using
-`eww-mode') and `.info' (using `info.el')."
-  :type 'string
-  :group 'geiser-kawa)
-
-(defcustom geiser-kawa-deps-jar-path
-  (geiser-kawa-deps--jar-path geiser-kawa-dir)
-  "Path to the kawa-geiser fat jar."
-  :type 'string
-  :group 'geiser-kawa)
-
-(defcustom geiser-kawa-use-included-kawa
-  nil
-  "Use the Kawa included with `geiser-kawa' instead of the `kawa' binary.
-
-Instead of downloading kawa yourself, you can use the Kawa version
-included in `geiser-kawa'."
-  :type 'boolean
-  :group 'geiser-kawa)
-
-
 ;;; REPL support:
-
-(defconst geiser-kawa--prompt-regexp
-  "#|kawa:[0-9]+|# ")
 
 (defun geiser-kawa--geiser-procedure (proc &rest args)
   "Geiser's marshall-procedure for `geiser-kawa'.
 Argument PROC passed by Geiser.
 Optional argument ARGS passed by Geiser."
 
-  (case proc
+  (cl-case proc
     ((eval compile)
-     (let* ((form (mapconcat 'identity args " ")) ;;unused
-            (send-this
-             (format
-              "(geiser:eval (interaction-environment) %S)"
-              (cadr args))))
-       send-this))
+     (format
+      "(geiser:eval (interaction-environment) %S)"
+      (cadr args)))
 
     ((load-file compile-file)
      (format "(geiser:load-file %s)" (car args)))
@@ -175,44 +94,19 @@ Argument MODULE argument passed by Geiser."
 
 ;;; REPL startup
 
-(defun geiser-kawa--version-command (binary)
-  "Return command to get kawa version.
-Argument BINARY argument passed by Geiser."
-  (let* ((program (if geiser-kawa-use-included-kawa
-                      "java"
-                    "kawa"))
-         (args  (if geiser-kawa-use-included-kawa
-                    (list (geiser-kawa-arglist--make-classpath-arg
-                           geiser-kawa-deps-jar-path)
-                          "kawa.repl"
-                          "--version")
-                  (list "--version")))
-         (output (apply #'process-lines
-                        (cons program args)))
-         (progname-plus-version (car output)))
-    ;; `progname-plus-version' is something like:
-    ;; "Kawa 3.1.1"
-    (cadr (split-string progname-plus-version " "))))
-
-(defun geiser-kawa--repl-startup (remote)
-  "Geiser's repl-startup.
-Argument REMOTE passed by Geiser."
-  (let ((geiser-log-verbose-p t))
-    (compilation-setup t)))
-
 
 ;;; Error display
 
 ;; TODO
 (defun geiser-kawa--enter-debugger ()
-  "TODO.")
+  "TODO")
 
 (defun geiser-kawa--display-error (module key msg)
   "Needed to show output (besides result).
 Modified from geiser-guile.el.
-Argument MODULE passed by Geiser.
-Argument KEY passed by Geiser.
-Argument MSG passed by Geiser."
+Argument MODULE is passed by Geiser.
+Argument KEY is passed by Geiser.
+Argument MSG is passed by Geiser."
   (when (stringp msg)
     (save-excursion (insert msg))
     (geiser-edit--buttonize-files))

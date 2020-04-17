@@ -1,5 +1,12 @@
 ;;; geiser-kawa-arglist.el --- Command-line arguments for Geiser support in Kawa -*- lexical-binding: t -*-
 
+;; Copyright (C) 2019, 2020 spellcard199 <spellcard199@protonmail.com>
+
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the Modified BSD License. You should
+;; have received a copy of the license along with this program. If
+;; not, see <http://www.xfree86.org/3.3.6/COPYRIGHT2.html#5>.
+
 ;;; Commentary:
 ;; Code for handling command line executable and arguments to obtain
 ;; geiser support in Kawa.
@@ -8,19 +15,10 @@
 ;; it is also supported by setting to non-nil the variable
 ;; `geiser-kawa-user-included-kawa'.
 
-;;; Code:
+(require 'geiser-kawa-globals)
+(require 'compile)
 
-(defvar geiser-kawa--arglist
-  `(;; jline "invisibly" echoes user input and prints ansi chars that
-    ;; makes harder detecting end of output and finding the correct
-    ;; prompt regexp.
-    "console:use-jline=no"
-    "-e"
-    "(require <kawageiser.Geiser>)"
-    "--")
-  "Variable containing the parameters to pass to Kawa at startup.
-If you really want to customize this, note that the default ones
-are all required for `geiser-kawa' to work.")
+;;; Code:
 
 (defun geiser-kawa--binary ()
   "Return the binary to call to start Kawa.
@@ -89,6 +87,33 @@ Argument CLASSPATH is a string containing the classpath."
    (if geiser-kawa-use-included-kawa
        (list "kawa.repl"))
    geiser-kawa--arglist))
+
+(defun geiser-kawa--version-command (binary)
+  "Return command to get kawa version.
+Argument BINARY argument passed by Geiser."
+  (let* ((program (if geiser-kawa-use-included-kawa
+                      "java"
+                    "kawa"))
+         (args  (if geiser-kawa-use-included-kawa
+                    (list (geiser-kawa-arglist--make-classpath-arg
+                           geiser-kawa-deps-jar-path)
+                          "kawa.repl"
+                          "--version")
+                  (list "--version")))
+         (output (apply #'process-lines
+                        (cons program args)))
+         (progname-plus-version (car output)))
+    ;; `progname-plus-version' is something like:
+    ;; "Kawa 3.1.1"
+    (cadr (split-string progname-plus-version " "))))
+
+(defun geiser-kawa--repl-startup (remote)
+  "Geiser's repl-startup.
+Argument REMOTE passed by Geiser."
+  ;; Does nothing for now. Keeping for reference.
+  ;; (let ((geiser-log-verbose-p t))
+  ;; (compilation-setup t))
+  )
 
 (provide 'geiser-kawa-arglist)
 
