@@ -11,9 +11,10 @@ import gnu.lists.LList;
 import gnu.lists.Pair;
 import gnu.mapping.Environment;
 import gnu.mapping.Symbol;
+import kawadevutil.eval.Eval;
 import kawadevutil.eval.EvalResult;
 import kawadevutil.eval.EvalResultAndOutput;
-import kawadevutil.redirect.RedirectedOutErr;
+import kawadevutil.redirect.result.RedirectedOutErr;
 
 public class GeiserEval {
     /*
@@ -21,7 +22,11 @@ public class GeiserEval {
      *  Here we are just sending arguments and converting our own
      *  types into the geiser protocol.
      */
-    public static kawadevutil.eval.Eval evaluator = new kawadevutil.eval.Eval();
+    public static kawadevutil.eval.Eval evaluator =
+            new kawadevutil.eval.Eval(
+                    Eval.SystemOutRedirectPolicy.BIDIRECT,
+                    true,
+                    true);
 
     public static String
     evalStr(Environment module, IString codeIStr) {
