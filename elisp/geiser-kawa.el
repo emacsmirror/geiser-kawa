@@ -138,7 +138,7 @@ Argument MSG is passed by Geiser."
   (find-symbol-begin geiser-kawa--symbol-begin)
   (display-error geiser-kawa--display-error)
   (case-sensitive nil)
-  (external-help geiser-kawa--manual-look-up))
+  (external-help geiser-kawa-manual--look-up))
 
 (geiser-impl--add-to-alist 'regexp "\\.scm$" 'kawa t)
 (geiser-impl--add-to-alist 'regexp "\\.sld$" 'kawa t)
