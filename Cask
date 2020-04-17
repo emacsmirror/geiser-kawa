@@ -11,6 +11,15 @@
 (files "elisp/*")
 
 (development
- (depends-on "buttercup"))
+ (depends-on "buttercup")
+ (depends-on "cask")
+ (depends-on "package-lint")
+ (depends-on "flycheck")
+ (depends-on "flycheck-package")
+ (depends-on "flycheck-cask")
+ (depends-on "smartparens")
+ (depends-on "evil-surround")
+ (depends-on "evil-escape")
+ (depends-on "aggressive-indent"))
 
 ;;; Cask ends here
