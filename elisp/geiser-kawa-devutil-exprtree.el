@@ -33,25 +33,35 @@
   (view-buffer-other-window
    geiser-kawa-devutil-exprtree-buffer))
 
-(defun geiser-kawa-devutil-exprtree--for-expression (code-str)
-  "Get the Expression tree CODE-STR."
+(defun geiser-kawa-devutil-exprtree--for (code-str)
+  "Get the Expression tree for CODE-STR."
   (geiser-kawa-util--eval-to-res
    `(geiser:kawa-devutil-expr-tree-formatted ,code-str)))
 
-(defun geiser-kawa-devutil-exprtree-sexp ()
-  "If region is active send region, otherwise send last expression."
+(defun geiser-kawa-devutil-exprtree--view-for (code-str)
+  "Get and view Expression tree for CODE-STR."
+  (geiser-kawa-devutil-exprtree--view
+   (geiser-kawa-devutil-exprtree--for
+    code-str)))
+
+(defun geiser-kawa-devutil-exprtree-region (reg-beg reg-end)
+  "View Exprtree for region.
+Argument REG-BEG is beginning of region.
+Argument REG-END is end of region."
+  (interactive "r")
+  (let ((code-str (buffer-substring-no-properties
+                   reg-beg reg-end)))
+    (geiser-kawa-devutil-exprtree--view-for code-str)))
+
+(defun geiser-kawa-devutil-exprtree-last-sexp ()
+  "View Exprtree for sexp before (point)."
   (interactive)
-  (let* ((code-str
-          (if (region-active-p)
-              (buffer-substring-no-properties (region-beginning)
-                                              (region-end))
-            (save-excursion
-              (let ((sexp-beg (progn (backward-sexp) (point)))
-                    (sexp-end (progn (forward-sexp) (point))))
-                (buffer-substring-no-properties sexp-beg sexp-end)))))
-         (expr-tree (geiser-kawa-devutil-exprtree--for-expression
-                     code-str)))
-    (geiser-kawa-devutil-exprtree--view expr-tree)))
+  (let ((code-str
+         (save-excursion
+           (let ((sexp-beg (progn (backward-sexp) (point)))
+                 (sexp-end (progn (forward-sexp) (point))))
+             (buffer-substring-no-properties sexp-beg sexp-end)))))
+    (geiser-kawa-devutil-exprtree--view-for code-str)))
 
 (provide 'geiser-kawa-devutil-exprtree)
 

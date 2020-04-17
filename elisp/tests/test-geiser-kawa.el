@@ -90,7 +90,7 @@
  (it "can `geiser-kawa-devutil-exprtree--for-expression'"
      (expect
       (string-suffix-p "SimpleSymbol)))"
-                       (geiser-kawa-devutil-exprtree--for-expression
+                       (geiser-kawa-devutil-exprtree--for
                         "(display 'foobar)")))
      :to-equal t)
 
