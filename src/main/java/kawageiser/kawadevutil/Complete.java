@@ -14,7 +14,6 @@ import gnu.mapping.Environment;
 import gnu.mapping.Symbol;
 import gnu.math.IntNum;
 import kawadevutil.complete.find.CompletionFindGeneric;
-import kawadevutil.complete.find.MakeCursorFinder;
 import kawadevutil.complete.find.packagemembers.CompletionFindPackageMemberUtil;
 import kawadevutil.complete.result.abstractdata.CompletionData;
 import kawadevutil.complete.result.abstractdata.CompletionForClassMember;
@@ -241,10 +240,10 @@ public class Complete {
                      Environment env)
             throws IOException {
         try {
-            CursorFinder cursorFinder = MakeCursorFinder.makeCursorFinder(
-                    codeStr.toString(), cursorIndex.intValue(),
-                    lang, env,
-                    true);
+            CursorFinder cursorFinder = CursorFinder.make(
+                    codeStr.toString(), cursorIndex.intValue(), true,
+                    lang, env
+            );
             return Optional.of(cursorFinder.getRootExprWrap());
         } catch (IOException e) {
             return Optional.empty();
