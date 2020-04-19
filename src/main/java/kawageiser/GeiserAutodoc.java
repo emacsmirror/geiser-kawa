@@ -157,12 +157,17 @@ public class GeiserAutodoc {
                                     ? paramListToFormattedParamLList(optionalParams, true)
                                     : LList.makeList(java.util.Collections.emptyList());
                     if (restParamMaybe.isPresent()) {
-                        optionalOrRestParamLList.add(
-                                Format.format(
-                                        "(... ~a...)",
-                                        formatParam(restParamMaybe.get(), false)
-                                )
+                        Object restParamFormatted = Format.format(
+                                "(~a...)",
+                                formatParam(restParamMaybe.get(), false)
                         );
+                        // adding to gnu.lists.EmptyList is not supported.
+                        if (optionalOrRestParamLList.size() == 0) {
+                            optionalOrRestParamLList =
+                                    LList.list1(restParamFormatted);
+                        } else {
+                            optionalOrRestParamLList.add(restParamFormatted);
+                        }
                     }
                     optionalParamList.add("optional");
                     optionalParamList.addAll(optionalOrRestParamLList);
@@ -211,7 +216,7 @@ public class GeiserAutodoc {
                     Procedure operator = (Procedure) operatorMaybe.get();
                     ProcDataGeneric procDataGeneric = ProcDataGeneric.makeForProcedure(operator);
                     operatorArgListMaybe = Optional.of(new OperatorArgListData(procDataGeneric));
-                } else if (operatorMaybe.isPresent() && operatorMaybe.get().getClass().equals(Class.class)){
+                } else if (operatorMaybe.isPresent() && operatorMaybe.get().getClass().equals(Class.class)) {
                     Class clz = (Class) operatorMaybe.get();
                     ProcDataGeneric procDataGeneric = ProcDataGeneric.makeForConstructors(clz);
                     operatorArgListMaybe = Optional.of(new OperatorArgListData(procDataGeneric));
