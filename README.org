@@ -63,6 +63,12 @@ To try geiser-kawa you need neither Maven nor Kawa:
 - =mvnw= ([[https://github.com/takari/maven-wrapper][maven-wrapper]]) takes care of downloading a project-specific Maven version
 - kawa-geiser has [[https://gitlab.com/groups/kashell/][Kawa's master branch]] as one of its dependencies. When =quickstart.el= calls =./mvnw package= (wrapped by =geiser-kawa-deps-mvnw-package=), it produces a jar that includes kawa-geiser and all its dependencies, including Kawa itself.
 
+** About Autodoc
+
+Double quotes around parameters: the reason why the arguments are enclosed in double quotes in autodoc is because special characters (e.g. =]=) aren't read as part of a symbol by the elisp reader that geiser relies on to display autodoc data. To work-around this limitation parameters are represented by using strings instead of symbols.
+
+Parameter names: parameter names are retrieved using the =gnu.bytecode= package (included in Kawa) for reading local variables in Java methods' bytecode. Since parameters are not always present in bytecode as local variables, especially for java, when not available the parameter name defaults to =argN=, where =N= is a number.
+
 ** About completion for java's fields, methods and packages
 :PROPERTIES:
 :CUSTOM_ID:       7ca3650a-2658-42f0-8274-96f194768e11
@@ -106,7 +112,7 @@ This project (geiser-kawa) is a translation/rewrite of [[https://gitlab.com/spel
         - the included maven project
         - gets data and features through kawa-devutil and wraps the result in the geiser protocol
 - Possibility to share code between kawa-devutil and Kawa's Language Server
-- Since kawa-devutil is now a different project from geiser-kawa, one could use it to avoid re-writing the data-getting logic if he wanted to implement a Kawa server for a tool other than geiser (e.g. nrepl, jupyter, swank/slime)
+- Since kawa-devutil is now a different project from geiser-kawa, one could use it to avoid re-writing the data-getting logic if she/he wanted to implement a Kawa server for a tool other than geiser (e.g. nrepl, jupyter, swank/slime)
 
 geiser-kawa VS geiser-kawa-scheme - recap table:
 
