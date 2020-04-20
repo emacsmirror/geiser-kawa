@@ -132,7 +132,12 @@ Argument MOD is passed by geiser, but it's not used here yet."
              nil (format
                   (concat
                    "Kawa's manual file specified by "
-                   "`geiser-kawa-manual-path' does not exist: \"%s\"")
+                   "`geiser-kawa-manual-path' does not exist: \"%s\". "
+                   "You can either compile it yourself or "
+                   "find it inside the pre-compiled Kawa release. "
+                   "See: https://www.gnu.org/software/kawa/Getting-Kawa.html. "
+                   "When you have a copy, set the `geiser-kawa-manual-path' "
+                   "elisp variable to where the .info or .epub file is located. ")
                   geiser-kawa-manual-path))
   (cond
    ((string-suffix-p ".epub" geiser-kawa-manual-path)
@@ -142,7 +147,7 @@ Argument MOD is passed by geiser, but it's not used here yet."
     (geiser-kawa-manual--info-search (symbol-name id)
                                      geiser-kawa-manual-path))
    (t (error "Supported formats for `geiser-kawa-manual-path' are only
-   `.epub' and `.info'"))))
+                   `.epub' and `.info'"))))
 
 (provide 'geiser-kawa-ext-help)
 
