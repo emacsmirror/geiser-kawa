@@ -3,8 +3,7 @@
 Since =geiser-kawa= limits itself to ask =kawa-devutil= for data and then wrap it in geiser's protocol, most of the bugs are actually in =kawa-devutil=.
 
 - Completion for Java is often broken
-- Autodoc when using colon notation on Java methods doesn't show all the alternatives
-- Evaluation should not capture Java's output by default, only Kawa's: I wrote it this way because at the time I was convinced it was a feature, but then I realized it's bad design
+- Autodoc when using colon notation on Java methods doesn't show all the alternatives (I can't find again examples of where it happened though)
 - Fix kawa-devutil issues
 
 ** Add elisp tests, find bugs, fix them
@@ -22,8 +21,6 @@ Write tests for these:
 #+END_SRC
 
 ** Write melpa recipe and put on melpa
-
-There are still obvious bugs that need to be fixed before the quality of the package becomes sufficient for melpa.
 
 I tried to make a melpa recipe and it seems to work. Here are the instructions to reproduce it.
 
@@ -62,3 +59,31 @@ Test that it works:
 2. =geiser-kawa-java-find-pc--cache=
 3. =geiser-kawa-java-find-pc-refresh-cache=
 3. =geiser-kawa-java-find-pc (&optional classloader-list)=
+
+** Add mechanism to inject kawa-geiser into running remote REPL
+
+It may be useful in cases where the user wants to have =Kawa= but not =kawa-geiser= as an actual dependency for her/his project, while still being able to use geiser-kawa. For example, for live inspection of a running java application.
+
+Is it possible to do it in a fileless way on the targe machine? Kawa does load classes without files. Learn how Kawa does it and if it's possible to:
+1. Create a new ClassLoader in the Kawa remote repl
+2. For each .class file in the =kawa-geiser= fat jar:
+     1. Encode .class file to base64 string
+     2. Send base64 string via the geiser connection
+     3. Decode base64
+     4. Add to ClassLoader
+3. Import and use =geiser= in the scheme environment directly from our ClassLoader
+
+** Consider if it's a good idea to write functions to download and uncompress kawa manual from ftp://ftp.gnu.org/pub/gnu/kawa/kawa-latest.zip
+
+Message could be something like: do you want to download and extract a copy of the manual from unsecure connection ... (file integrity will be checked with sha265 however)?
+
+Current sha256sum for ftp://ftp.gnu.org/pub/gnu/kawa/kawa-3.1.1.zip: dab1f41da968191fc68be856f133e3d02ce65d2dbd577a27e0490f18ca00fa22
+
+#+BEGIN_SRC emacs-lisp
+(defun sha256-of-file(file-path)
+  (secure-hash
+   'sha256
+   (with-temp-buffer
+     (insert-file-contents file-path)
+     (buffer-substring-no-properties (point-min) (point-max)))))
+#+END_SRC

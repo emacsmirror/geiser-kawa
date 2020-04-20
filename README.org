@@ -69,6 +69,8 @@ Double quotes around parameters: the reason why the arguments are enclosed in do
 
 Parameter names: parameter names are retrieved using the =gnu.bytecode= package (included in Kawa) for reading local variables in Java methods' bytecode. Since parameters are not always present in bytecode as local variables, especially for java, when not available the parameter name defaults to =argN=, where =N= is a number.
 
+[[https://gitlab.com/kashell/Kawa/-/blob/master/gnu/kawa/lispexpr/LangObjType.java][LangObjType objects]]: these are special objects that may behave like procedures. When these are called as procedures, a constructor java method is called. This method does not have the same name as the symbol you insert in Kawa, so I decided that it was a good idea to show the method name as part of the displayed module, preceded by a colon. I don't know if it's a good idea, but it would be easy to change if it's not.
+
 ** About completion for java's fields, methods and packages
 :PROPERTIES:
 :CUSTOM_ID:       7ca3650a-2658-42f0-8274-96f194768e11
