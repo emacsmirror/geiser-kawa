@@ -196,7 +196,6 @@ members of package as returned by kawa-geiser."
 `kawa-devutil' is a java dependency of `kawa-geiser', itself a java
 dependency of `geiser-kawa'."
   (interactive)
-
   (let* ((code-and-point-data
           (geiser-kawa-devutil-complete--code-point-from-toplevel))
          (code-str     (cdr (assoc "code-str"
@@ -233,7 +232,7 @@ Argument CODE-STR is a string containing the code where completion
 must happen.  It must be syntactically correct Kawa scheme.
 Argument CURSOR-INDEX is an integer representing where the cursor is
 inside `CURSOR-STR'."
-  (geiser-kawa-util--eval-to-res
+  (geiser-kawa-util--eval/result
    `(geiser:kawa-devutil-complete-expr-tree
      ,code-str
      ,cursor-index)))

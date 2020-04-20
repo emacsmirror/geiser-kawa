@@ -35,7 +35,7 @@
 
 (defun geiser-kawa-devutil-exprtree--for (code-str)
   "Get the Expression tree for CODE-STR."
-  (geiser-kawa-util--eval-to-res
+  (geiser-kawa-util--eval/result
    `(geiser:kawa-devutil-expr-tree-formatted ,code-str)))
 
 (defun geiser-kawa-devutil-exprtree--view-for (code-str)

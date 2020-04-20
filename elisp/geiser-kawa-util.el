@@ -20,32 +20,76 @@
 
 ;;; Code:
 
-(defun geiser-kawa-util--eval-to-res (sexp)
-  "Alternative to geiser-eval--send/eval with custom behavior.
-If a Throwable has been raised while running in Kawa an error is
-signalled.
-Argument SEXP is a sexp to evaluate in Kawa."
-  (let* ((question
-          (format "(geiser:eval (interaction-environment) %S)"
-                  (format "%S" sexp)))
-         (answer (geiser-eval--send/wait question)))
+(defun geiser-kawa-util--eval (sexp-or-str)
+  "Eval `sexp-or-str' in Kawa.
+1. `sexp-or-str' is wrapped by:
+   (geiser:eval ...)
+2. Resulting string is passed to `geiser-eval--send/wait' for
+   evaluation
+Argument SEXP-OR-STR is code to be evaluated by the `geiser:eval'
+procedure in Kawa.  It can be either a `list' or a `string'."
+  ;; Check type of `sexp-or-str'. If type is not supported Kawa would
+  ;; receive `nil' as form to evaluate, which would raise a seemingly
+  ;; wierd error:
+  ;; unbound location: nil
+  ;;   at gnu.mapping.DynamicLocation.get(DynamicLocation.java:36)
+  ;;   ...
+  (let ((valid-types '(string cons))
+        (sexp-or-str-type (type-of sexp-or-str)))
+    (when (not (member sexp-or-str-type
+                       valid-types))
+      (error
+       (concat "Wrong type argument: Type of `sexp-or-str' is "
+               (format "`%S'" sexp-or-str-type) ". "
+               "Valid types for `sexp-or-str' can only be: "
+               (format "%S" valid-types)))))
+
+  (let* ((code-as-str (cond ((equal (type-of sexp-or-str)
+                                    'string)
+                             sexp-or-str)
+                            ((equal (type-of sexp-or-str)
+                                    'cons)
+                             (format "%S" sexp-or-str))))
+         (question (format
+                    "(geiser:eval (interaction-environment) %S)"
+                    code-as-str)))
+    (geiser-eval--send/wait question)))
+
+(defun geiser-kawa-util--retort-result (ret)
+  "This function skips the reading `geiser-eval--retort-result' does.
+Differently from `geiser-eval--retort-result', this function doesn't
+have a variable binding depth limit.  We use this when we need to read
+strings longer than what `geiser-eval--retort-result' allows.
+Drawback is that `RET' must be valid elisp, while
+`geiser-eval--retort-result' uses an elisp implementation of a scheme
+reader."
+  (car (read-from-string (cadr (assoc 'result ret)))))
+
+(defun geiser-kawa-util--eval/result (sexp-or-str
+                                      &optional retort-result)
+  "Alternative to `geiser-eval--send/result' with custom behavior.
+- `sexp-or-str' is wrapped by:
+  (geiser:eval (interaction-environment) ...)
+- An error is signalled if a Throwable has been raised while running
+  in Kawa.
+Argument SEXP-OR-STR is code to be evaluated in Kawa.  It can be either
+a `list' or a `string'.
+Optional argument RETORT-RESULT determines if Kawa's answer should be
+read as an elisp object by `geiser-kawa-util--retort-result'."
+  (let ((answer (geiser-kawa-util--eval sexp-or-str)))
     (if (assoc 'error answer)
         (signal 'peculiar-error
                 (list (string-trim
                        (car (split-string (geiser-eval--retort-output
                                            answer)
                                           "\t")))))
-      ;; from: ((result "expr-tree") (output . ...))
-      ;; to: "expr-tree"
-      (cadr (car answer)))))
-
-(defun geiser-kawa-util--retort-result (ret)
-  "Function that skips the reading `geiser-eval--retort-result' does.
-Differently from `geiser-eval--retort-result', this function doesn't
-have a variable binding depth limit.  We use this when we need to read
-strings longer than what `geiser-eval--retort-result' allows.
-Drawback is that `RET' must be valid elisp."
-  (car (read-from-string (cadr (assoc 'result ret)))))
+      ;; from: ((result "<actual-result>") (output . ...))
+      ;; to either:
+      ;; - `retort-result' is non-nil: <actual-result>
+      ;; - `retort-result' is nil: "<actual-result>"
+      (if retort-result
+          (geiser-kawa-util--retort-result answer)
+        (cadr (car answer))))))
 
 (defun geiser-kawa-util--repl-point-after-prompt ()
   "If in a Kawa REPL buffer, get point after prompt."
