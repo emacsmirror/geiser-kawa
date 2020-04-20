@@ -108,6 +108,60 @@ How it works (the region getting part is quite rudimentray):
 
 You can find some examples and known issues in [[https://gitlab.com/spellcard199/kawa-devutil][kawa-devutil]]'s README.
 
+** Extending =geiser-kawa=
+
+Since you can get the result of a Kawa expression through geiser you can extend =geiser-kawa= blending both Elisp and Kawa, with the limitations due to the fact it's strings that are actually passed back and forth.
+
+The rest of this section is an actual example. Let's say we wanted to extend =geiser-kawa= to list all the classes available in the default classloaders.
+
+Since =kawa-devutil= and its dependencies are dependencies of =kawa-geiser=, we already have the [[https://github.com/classgraph/classgraph][Classgraph]] included in =kawa-geiser= even though =kawa-devutil= shades it to: =kawadevutil.shaded.io.github.classgraph=:
+
+This is some simple Kawa code to get a list of all classes in the default classloaders using the ClassGraph library included in =kawa-geiser=:
+
+#+BEGIN_SRC scheme
+(let* ((cg (kawadevutil.shaded.io.github.classgraph.ClassGraph))
+       (scanResult (invoke
+                    (invoke
+                     (invoke
+                      cg
+                      "enableSystemJarsAndModules")
+                     "enableClassInfo")
+                    "scan")))
+  (scanResult:getAllClasses))
+#+END_SRC
+
+Now we can write an interactive elisp function that evaluates the code above each time it's called and then puts the result into an emacs buffer:
+
+#+BEGIN_SRC emacs-lisp
+(defun my-geiser-kawa-list-all-classes ()
+  "A simple function that uses `geiser-kawa' to ask Kawa a list of all
+the classes in the default classloaders of the current REPL and then
+displays them in a dedicated buffer."
+  (interactive)
+  ;; Switch to dedicated buffer and create it if it doesn't exist.
+  (switch-to-buffer-other-window
+   (get-buffer-create "*geiser-kawa-classlist*"))
+  ;; Clear buffer in case you already run the command once.
+  (delete-region (point-min) (point-max))
+  ;; Eval our Kawa code and insert result of evaluation in the buffer
+  ;; we switched to above.
+  (insert
+   (geiser-kawa-util--eval/result
+     ;; The same kawa code as above, quoted so that it's not evaluated
+     ;; as elisp.
+    '(let* ((cg (kawadevutil.shaded.io.github.classgraph.ClassGraph))
+            (scanResult (invoke
+                         (invoke
+                          (invoke
+                           cg
+                           "enableSystemJarsAndModules")
+                          "enableClassInfo")
+                         "scan")))
+       (scanResult:getAllClasses)))))
+#+END_SRC
+
+Once you evaluate this elisp function, if you have an active Kawa repl associated with the current buffer and use =M-x my-geiser-kawa-list-all-classes=, after some seconds (there are many thousands of classes) a list of classes will be displayed in a new buffer.
+
 ** Difference from [[https://gitlab.com/spellcard199/geiser-kawa-scheme][geiser-kawa-scheme]]
 
 This project (geiser-kawa) is a translation/rewrite of [[https://gitlab.com/spellcard199/geiser-kawa-scheme][geiser-kawa-scheme]], which has been my first attempt at writing geiser-kawa. After geiser-kawa-scheme confirmed me that a geiser-kawa implementation was possible I decided to rewrite the Kawa side using Kawa's Java API, for the several reasons:
