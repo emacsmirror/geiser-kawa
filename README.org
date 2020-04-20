@@ -162,6 +162,34 @@ displays them in a dedicated buffer."
 
 Once you evaluate this elisp function, if you have an active Kawa repl associated with the current buffer and use =M-x my-geiser-kawa-list-all-classes=, after some seconds (there are many thousands of classes) a list of classes will be displayed in a new buffer.
 
+** Adding java dependencies to Kawa / Embedding kawa-geiser in your java application
+
+The easiest way is:
+1. Create a new maven project
+2. Add to the =pom.xml=:
+     - Your dependencies
+     - [[https://jitpack.io][Jitpack]] resolver:
+       : <repositories>
+       :   <repository>
+       :     <id>jitpack.io</id>
+       :     <url>https://jitpack.io</url>
+       :   </repository>
+       : </repositories>
+     - =kawa-geiser= dependency (you can replace =-SNAPSHOT= with commit SHA):
+       : <dependencies>
+       :   <dependency>
+       :     <groupId>com.gitlab.spellcard199</groupId>
+       :     <artifactId>geiser-kawa</artifactId>
+       :     <version>-SNAPSHOT</version>
+       :   </dependency>
+       : </dependencies>
+3. Start a Kawa REPL from Java (should have all the dependencies included now):
+     : String[] kawaArgs = new String[]{"--server", "37146"};
+     : Scheme scheme = new Scheme();
+     : scheme.eval("(require <kawageiser.Geiser>)");
+     : scheme.runAsApplication(kawaArgs);
+4. Use the =geiser-connect= command from emacs and insert the port number we specified in the previous step when prompted
+
 ** Difference from [[https://gitlab.com/spellcard199/geiser-kawa-scheme][geiser-kawa-scheme]]
 
 This project (geiser-kawa) is a translation/rewrite of [[https://gitlab.com/spellcard199/geiser-kawa-scheme][geiser-kawa-scheme]], which has been my first attempt at writing geiser-kawa. After geiser-kawa-scheme confirmed me that a geiser-kawa implementation was possible I decided to rewrite the Kawa side using Kawa's Java API, for the several reasons:
