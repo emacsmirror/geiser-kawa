@@ -63,6 +63,12 @@ To try geiser-kawa you need neither Maven nor Kawa:
 - =mvnw= ([[https://github.com/takari/maven-wrapper][maven-wrapper]]) takes care of downloading a project-specific Maven version
 - kawa-geiser has [[https://gitlab.com/groups/kashell/][Kawa's master branch]] as one of its dependencies. When =quickstart.el= calls =./mvnw package= (wrapped by =geiser-kawa-deps-mvnw-package=), it produces a jar that includes kawa-geiser and all its dependencies, including Kawa itself.
 
+** About manual lookup
+
+To use the =geiser-doc-lookup-manual= feature you need a copy of the Kawa manual. You can either compile it from the Kawa source code or extract it from the pre-compiled Kawa release available on the Kawa website: https://www.gnu.org/software/kawa/Getting-Kawa.html.
+
+Once you have the manual in either .info or .epub format, set the =geiser-kawa-manual-path= elisp variable to the path of the file.
+
 ** About Autodoc
 
 Double quotes around parameters: the reason why the arguments are enclosed in double quotes in autodoc is because special characters (e.g. =]=) aren't read as part of a symbol by the elisp reader that geiser relies on to display autodoc data. To work-around this limitation parameters are represented by using strings instead of symbols.
