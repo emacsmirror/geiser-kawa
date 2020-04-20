@@ -6,7 +6,7 @@
 
 It has 2 parts:
 - =geiser-kawa=: elisp package inside the =elisp= directory that gives the name to the whole project
-- =kawa-geiser=: maven project written using Kawa's Java API that adds procedures called by geiser-kawa to a Kawa Scheme REPL
+- =kawa-geiser=: included maven project written using Kawa's Java API. When it's imported from a Kawa scheme REPL, procedures required by =geiser-kawa= are added to the Kawa environment
 
 ** Supported Kawa versions
 :PROPERTIES:
@@ -32,7 +32,7 @@ Only versions of Kawa > 3.1 are supported, mostly due to the fact that before th
             - info: using emacs' Info-mode
             - epub: using emacs' eww browser
 - kawa- and java-specific:
-    - [[#7ca3650a-2658-42f0-8274-96f194768e11][Completion for java's package, class, field, method names]]
+    - [[#7ca3650a-2658-42f0-8274-96f194768e11][Completion for Java package and class members (packages, classes, methods, fields)]]
 
 ** Unsupported features
 
@@ -71,14 +71,18 @@ Parameter names: parameter names are retrieved using the =gnu.bytecode= package 
 
 [[https://gitlab.com/kashell/Kawa/-/blob/master/gnu/kawa/lispexpr/LangObjType.java][LangObjType objects]]: these are special objects that may behave like procedures. When these are called as procedures, a constructor java method is called. This method does not have the same name as the symbol you insert in Kawa, so I decided that it was a good idea to show the method name as part of the displayed module, preceded by a colon. I don't know if it's a good idea, but it would be easy to change if it's not.
 
-** About completion for java's fields, methods and packages
+Autodoc for macros: not supported.
+
+** About completion for Java package and class members (packages, classes, methods, fields)
 :PROPERTIES:
 :CUSTOM_ID:       7ca3650a-2658-42f0-8274-96f194768e11
 :END:
 
-The whole project is in a persistent "experimental" state, but this part even more so because it's based on assumptions I'm not sure about.
+The whole project is in a persistent "experimental" state, but this part even more so because it's based on assumptions that:
+- I'm not sure about
+- May not hold anymore if/when the Kawa compiler changes how accessing packages and class members is represented in its AST/Expression tree
 
-The main interactive elisp function is =geiser-kawa-complete-fmp-at-point=. By default, it's not bound to a key. (fmp stands for field-method-package).
+The main interactive elisp function is =geiser-kawa-devutil-complete-at-point=. By default, it's not bound to any key.
 
 Supported forms (with issues) are:
     - completion for package and class names: dot notation, like in java
@@ -88,18 +92,15 @@ Supported forms (with issues) are:
         - =invoke=
         - =invoke-static=
         - colon notation
+Unsupported forms:
+    - Kawa's star-colon notation (e.g: =(*:getClass "foobar")=)
 
 How it works (the region getting part is quite rudimentray):
-1. A region of the current buffer and cursor point inside it are sent to kawa-geiser, which uses [[https://gitlab.com/spellcard199/kawa-devutil][kawa-devutil]] for actual functionality. The region of the buffer goes:
-     - from: either:
-         - =(geiser-syntax--pop-to-top)=, if non-nil
-         - =(line-beginning-position)=, if =(geiser-syntax--pop-to-top)= is =nil=
-     - to: either:
-         - end of sexp beginning at toplevel, if =(geiser-syntax--pop-to-top)= is non-nil
-         - =(line-end-position)=, if =(geiser-syntax--pop-to-top)= is =nil=
-2. [[https://gitlab.com/spellcard199/kawa-devutil][kawa-devutil]]'s completion method is called passing code and cursor point
+1. A region of the current buffer and cursor point inside it are sent to a Kawa procedure
+2. kawa-devutil's pattern matching is run on the resulting Expression tree
+3. If a match is found, the data is returned to Emacs
 
-You can find some examples and known issues in [[https://gitlab.com/spellcard199/kawa-devutil][kawa-devutil]]'README.
+You can find some examples and known issues in [[https://gitlab.com/spellcard199/kawa-devutil][kawa-devutil]]'s README.
 
 ** Difference from [[https://gitlab.com/spellcard199/geiser-kawa-scheme][geiser-kawa-scheme]]
 
