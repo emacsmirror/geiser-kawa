@@ -85,4 +85,24 @@ public class GeiserAutodocTest {
             assertEquals("java.lang.String:format", llist.get(0));
         }
     }
+
+    @Test
+    public static void
+    testLangObjType() {
+        Scheme scheme = new Scheme();
+        Environment env = scheme.getEnvironment();
+        Symbol filepath = env.getSymbol("filepath");
+        GeiserAutodoc.AutodocDataForSymId autodocDataForFilepath
+                = new GeiserAutodoc.AutodocDataForSymId(filepath, env, scheme);
+        String filepathDataAsString = autodocDataForFilepath.toLList().toString();
+        assertTrue(filepathDataAsString.startsWith("(filepath"));
+        assertTrue(filepathDataAsString.contains("module gnu kawa io FilePath"));
+
+        Symbol list = env.getSymbol("list");
+        GeiserAutodoc.AutodocDataForSymId autodocDataForList
+                = new GeiserAutodoc.AutodocDataForSymId(list, env, scheme);
+        String listDataAsString = autodocDataForList.toLList().toString();
+        assertTrue(listDataAsString.startsWith("(list"));
+        assertTrue(listDataAsString.contains("module gnu kawa functions MakeList"));
+    }
 }

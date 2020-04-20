@@ -8,6 +8,7 @@ package kawageiser;
 import gnu.expr.CompiledProc;
 import gnu.expr.Language;
 import gnu.kawa.functions.Format;
+import gnu.kawa.lispexpr.LangObjType;
 import gnu.lists.LList;
 import gnu.mapping.Environment;
 import gnu.mapping.Procedure;
@@ -19,6 +20,7 @@ import kawadevutil.eval.EvalResult;
 import kawadevutil.kawa.GnuMappingLocation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -212,19 +214,42 @@ public class GeiserAutodoc {
                 operatorMaybe = evalResult.getResult() != null
                         ? Optional.of(evalResult.getResult())
                         : Optional.empty();
-                if (operatorMaybe.isPresent() && Procedure.class.isAssignableFrom(operatorMaybe.get().getClass())) {
-                    Procedure operator = (Procedure) operatorMaybe.get();
-                    ProcDataGeneric procDataGeneric = ProcDataGeneric.makeForProcedure(operator);
-                    operatorArgListMaybe = Optional.of(new OperatorArgListData(procDataGeneric));
-                } else if (operatorMaybe.isPresent() && operatorMaybe.get().getClass().equals(Class.class)) {
-                    Class clz = (Class) operatorMaybe.get();
-                    ProcDataGeneric procDataGeneric = ProcDataGeneric.makeForConstructors(clz);
-                    operatorArgListMaybe = Optional.of(new OperatorArgListData(procDataGeneric));
-                } else {
-                    // Not a procedure
-                    // TODO : is it possible to implement autodoc for macros?
-                    //        If not: write a comment why.
-                    operatorArgListMaybe = Optional.empty();
+                if (operatorMaybe.isPresent()) {
+                    Object operator = operatorMaybe.get();
+
+                    if (Procedure.class.isAssignableFrom(operator.getClass())) {
+                        Procedure operatorProc
+                                = (Procedure) operator;
+                        ProcDataGeneric procDataGeneric
+                                = ProcDataGeneric.makeForProcedure(operatorProc);
+                        operatorArgListMaybe
+                                = Optional.of(new OperatorArgListData(procDataGeneric));
+
+                    } else if (operator.getClass().equals(Class.class)) {
+                        Class operatorClass
+                                = (Class) operatorMaybe.get();
+                        ProcDataGeneric procDataGeneric
+                                = ProcDataGeneric.makeForConstructors(operatorClass);
+                        operatorArgListMaybe
+                                = Optional.of(new OperatorArgListData(procDataGeneric));
+
+                    } else if (LangObjType.class.isAssignableFrom(operator.getClass())) {
+                        LangObjType operatorLOT
+                                = (LangObjType) operator;
+                        Procedure constructorProc
+                                = operatorLOT.getConstructor();
+                        ProcDataGeneric procDataGeneric
+                                = ProcDataGeneric.makeForProcedure(constructorProc);
+                        operatorArgListMaybe
+                                = Optional.of(new OperatorArgListData(procDataGeneric));
+
+                    } else {
+                        // Not a procedure
+                        // TODO : is it possible to implement autodoc for macros?
+                        //        If not: write a comment why.
+                        operatorArgListMaybe = Optional.empty();
+                    }
+
                 }
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
@@ -248,24 +273,58 @@ public class GeiserAutodoc {
 
             // TODO: write a procedure that gets the module getMethods
             //       which a symbol comes getMethods using "the right way" (is there one?)
-            // TODO: When we find the correct way to do it, refactor moduleValue inside
+            // TODO: When we find the correct way to do it, refactor moduleLList inside
             //       ProcDataNonGeneric or a generic wrapper for Procedure data
-            LList moduleValue = null;
-            if (operatorMaybe.isPresent() && operatorMaybe.get().getClass() == CompiledProc.class) {
-                CompiledProc compProc = (CompiledProc) operatorMaybe.get();
-                moduleValue = LList.makeList(
-                        java.util.Arrays
-                                .asList(compProc
-                                        .getModuleClass()
-                                        .getName()
-                                        .split("\\.")));
-            } else {
+            LList moduleLList = null;
+            if (this.operatorMaybe.isPresent()) {
+
+                Object operator = this.operatorMaybe.get();
+
+                if (operator.getClass().equals(CompiledProc.class)) {
+                    CompiledProc compProc = (CompiledProc) operator;
+                    moduleLList = LList.makeList(
+                            java.util.Arrays
+                                    .asList(compProc
+                                            .getModuleClass()
+                                            .getName()
+                                            .split("\\.")));
+
+                } else if (operator.getClass().equals(LangObjType.class)
+                        && this.operatorArgListMaybe.isPresent()) {
+                    Procedure constructorProc = ((LangObjType) operator).getConstructor();
+                    String constructorName = constructorProc.getName();
+                    // constructorName examples:
+                    // list: list
+                    // filepath: gnu.kawa.io.FilePath.makeFilePath(java.lang.Object)
+                    String constructorNameNoSig = constructorName.contains("(")
+                                    ? constructorName
+                                    .substring(0, constructorName.indexOf("("))
+                                    : constructorName;
+                    ArrayList<String> splitAtDot = new ArrayList<>(
+                            Arrays.asList(constructorNameNoSig.split("\\."))
+                    );
+                    int procNameIndex = splitAtDot.size() - 1;
+                    String procNameOnly = splitAtDot.get(procNameIndex);
+
+                    Class moduleAsClass
+                            = this.operatorArgListMaybe.get().procDataGeneric.getModule();
+                    ArrayList<String> moduleList = new ArrayList<>();
+                    moduleList.addAll(
+                            Arrays.asList(moduleAsClass.getName().split("\\."))
+                    );
+                    moduleList.add(":" + procNameOnly);
+                    moduleLList = LList.makeList(moduleList);
+                }
+            }
+
+            // If none of the previous conditions matched, moduleLList is still null.
+            if (moduleLList == null) {
                 try {
                     // If it's not a CompiledProc it does not have a
                     // `getModule' method: fallback to trying to figure
                     // out getMethods GnuMappingLocation in Environment.
                     // TODO: generalize to arbitrary environment
-                    moduleValue = (LList) kawa.lib.ports.read(
+                    moduleLList = (LList) kawa.lib.ports.read(
                             new gnu.kawa.io.CharArrayInPort(
                                     GnuMappingLocation.baseLocationToModuleName(
                                             environment.lookup(symId).getBase()
@@ -275,7 +334,7 @@ public class GeiserAutodoc {
                 } catch (NullPointerException e) {
                     // If it is not even a sym in the environment, give up.
                     // TODO: should we consider all java classes as modules?
-                    moduleValue = LList.makeList(new ArrayList());
+                    moduleLList = LList.makeList(new ArrayList());
                 }
             }
 
@@ -290,10 +349,10 @@ public class GeiserAutodoc {
             // so geiser ignores it.
             String symIdAsStr = symId.toString();
             LList res;
-            if (moduleValue.size() > 0) {
+            if (moduleLList.size() > 0) {
                 ArrayList<Object> moduleList = new ArrayList<>();
                 moduleList.add("module");
-                for (Object m : moduleValue) {
+                for (Object m : moduleLList) {
                     moduleList.add(Symbol.valueOf(m.toString()));
                 }
                 res = LList.list3(
