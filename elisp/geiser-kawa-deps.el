@@ -70,8 +70,9 @@ at REPL startup."
 (defun geiser-kawa-deps--run-kawa-unadviced()
   "Call `run-kawa' without triggering our advice."
   (geiser-kawa-deps--run-kawa--advice-remove)
-  (run-kawa)
-  (geiser-kawa-deps--run-kawa--advice-add))
+  (unwind-protect
+      (run-kawa)
+    (geiser-kawa-deps--run-kawa--advice-add)))
 
 (defun geiser-kawa-deps--run-kawa--add-compil-hook()
   "Run `run-kawa' unadviced the next time a compilation finishes."
