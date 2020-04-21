@@ -76,7 +76,7 @@ public class Complete {
     private static LList
     toLList(CompletionForClassMember completionForClassMember) {
 
-        String ownerClassName = completionForClassMember.getForClass().getName();
+        String ownerClassName = completionForClassMember.getOwnerClass().getName();
 
         ArrayList<String> modifiers = new ArrayList<>();
         for (Object modifier : completionForClassMember.getModifierMask().getRequired()) {

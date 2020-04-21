@@ -1,0 +1,10 @@
+#+STARTUP:contents
+** Would something like emacs -> dynamic module -> JNI -> add kawa-geiser to classpath -> java -> kawa -> geiser-kawa work?
+   
+Yes. I tried to make some simple changes to [[https://github.com/jbalint/emacs-gargoyle][emacs-gargoyle]] (my first and only time writing C) and it was very fast (at least 10 times faster than sockets).
+Limitations of using =geiser-kawa= directly from JNI:
+- Message passing is through strings: =emacs-gargoyle= makes an attempt at establishing a way to write conversions between types, but for the minimal part of it I explored, I used just strings
+- Due to emacs' GIL you can call java from elisp but you can't call elisp from java (nor C): you can work around this using:
+    - for elisp->java/kawa: directly JNI: very fast
+    - for java/kawa->elisp: emacs server: slower and wouldn't require dynamic modules anyway
+Unless I had to pass very large data between emacs and java/kawa, I would prefer to use sockets.
