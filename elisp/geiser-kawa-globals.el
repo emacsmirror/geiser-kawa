@@ -82,6 +82,7 @@ included in `geiser-kawa'."
     ;; makes harder detecting end of output and finding the correct
     ;; prompt regexp.
     "console:use-jline=no"
+    "--console"    ; required on windows
     "-e"
     "(require <kawageiser.Geiser>)"
     "--")

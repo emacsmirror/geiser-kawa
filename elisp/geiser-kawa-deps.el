@@ -33,8 +33,12 @@ at REPL startup."
   ;; Using `mvn package' from the pom.xml's directory should produce a
   ;; jar containing all the java dependencies.
   (interactive)
-  (let* ((default-directory geiser-kawa-dir)
-         (mvn-buf (compile "./mvnw package")))
+  (let* ((mvnw-package
+          (if (string-equal system-type "windows-nt")
+              "mvnw.cmd package"
+            "./mvnw package"))
+         (default-directory geiser-kawa-dir)
+         (mvn-buf (compile mvnw-package)))
     (when mvn-buf
       (let ((save-buf (current-buffer)))
         (switch-to-buffer-other-window mvn-buf)

@@ -93,7 +93,7 @@ Argument CLASSPATH is a string containing the classpath."
 Argument BINARY argument passed by Geiser."
   (let* ((program (if geiser-kawa-use-included-kawa
                       "java"
-                    "kawa"))
+                    binary))
          (args  (if geiser-kawa-use-included-kawa
                     (list (geiser-kawa-arglist--make-classpath-arg
                            geiser-kawa-deps-jar-path)

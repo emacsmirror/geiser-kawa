@@ -48,7 +48,9 @@ Only versions of Kawa > 3.1 are supported, mostly due to the fact that before th
 
 ** Try geiser-kawa without modifying your emacs configuration
 
-1. Get Emacs and [[https://github.com/cask/cask][Cask]] and make them available through your $PATH
+1. Prerequisites:
+     - =java=, =emacs= and [[https://github.com/cask/cask][cask]] available through your =$PATH=
+     - =$JAVA_HOME= environment variable set
 2. Clone this repository
   : git clone "https://gitlab.com/spellcard199/geiser-kawa.git"
 3. cd into the cloned dir:
@@ -62,6 +64,30 @@ Only versions of Kawa > 3.1 are supported, mostly due to the fact that before th
 To try geiser-kawa you need neither Maven nor Kawa:
 - =mvnw= ([[https://github.com/takari/maven-wrapper][maven-wrapper]]) takes care of downloading a project-specific Maven version
 - kawa-geiser has [[https://gitlab.com/groups/kashell/][Kawa's master branch]] as one of its dependencies. When =quickstart.el= calls =./mvnw package= (wrapped by =geiser-kawa-deps-mvnw-package=), it produces a jar that includes kawa-geiser and all its dependencies, including Kawa itself.
+
+** Manual Installation
+
+1. Prerequisites:
+     - =emacs=
+     - =java= available through your =$PATH=
+     - =$JAVA_HOME= environment variable set
+2. Install the =geiser= package in Emacs
+3. Clone this repository
+  : git clone "https://gitlab.com/spellcard199/geiser-kawa.git"
+4. Package java dependencies:
+     1. cd into =geiser-kawa=
+     2. run =./mvnw package=
+5. Add the elisp directory inside this project to Emacs' =load-path=:
+    : (add-to-list 'load-path "<path-to-geiser-kawa/elisp>")
+6. Require =kawa-geiser=:
+    : (require 'geiser-kawa)
+7. Either:
+     - Set the =geiser-kawa-use-included-kawa= variable to non-nil: to use the Kawa version included in =geiser-kawa=
+     - [[https://www.gnu.org/software/kawa/Getting-Kawa.html][Get Kawa]] and either:
+         - set the =geiser-kawa-binary= variable
+         - add =kawa= to =$PATH=
+8. Run kawa:
+    : M-x run-kawa
 
 ** About manual lookup
 
@@ -189,6 +215,10 @@ The easiest way is:
      : scheme.eval("(require <kawageiser.Geiser>)");
      : scheme.runAsApplication(kawaArgs);
 4. Use the =geiser-connect= command from emacs and insert the port number we specified in the previous step when prompted
+
+** Is Windows supported?
+
+It seems to work, but I don't usually use Windows.
 
 ** Difference from [[https://gitlab.com/spellcard199/geiser-kawa-scheme][geiser-kawa-scheme]]
 
