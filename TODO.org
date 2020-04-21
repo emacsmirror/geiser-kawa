@@ -6,20 +6,6 @@ Since =geiser-kawa= limits itself to ask =kawa-devutil= for data and then wrap i
 - Autodoc when using colon notation on Java methods doesn't show all the alternatives (I can't find again examples of where it happened though)
 - Fix kawa-devutil issues
 
-** Add elisp tests, find bugs, fix them
-
-Write tests for these:
-
-#+BEGIN_SRC emacs-lisp :results silent
-(setq f (geiser-kawa-devutil-complete--get-data "java.lang.String:" 17))
-(setq m (geiser-kawa-devutil-complete--get-data "(java.lang.String:)" 18))
-(setq pm (geiser-kawa-devutil-complete--get-data "(java.lang.)" 11))
-(setq pm1 (geiser-kawa-devutil-complete--get-data "(java.lang)" 10))
-(setq spm (geiser-kawa-devutil-complete--get-data "(co)" 3))
-(setq s (geiser-kawa-devutil-complete--get-data "(disp)" 5))
-(setq s1 (geiser-kawa-devutil-complete--get-data "(di)" 3))
-#+END_SRC
-
 ** Write melpa recipe and put on melpa
 
 I tried to make a melpa recipe and it seems to work. Here are the instructions to reproduce it.
@@ -52,15 +38,7 @@ Test that it works:
   : (setq geiser-kawa-use-included-kawa t)
 4. =run-kawa=
 
-** Check if Kawa, Emacs and Geiser work on Windows. If yes, make the elisp function wrapping maven wrapper run =mvnw.cmd= instead of =mvnw= when on Windows
-** Add geiser-kawa-java-find-pc (package or class)
-
-1. =geiser-kawa-java-find-pc-default-classloaders=
-2. =geiser-kawa-java-find-pc--cache=
-3. =geiser-kawa-java-find-pc-refresh-cache=
-3. =geiser-kawa-java-find-pc (&optional classloader-list)=
-
-** Add mechanism to inject kawa-geiser into running remote REPL
+** Consider adding mechanism to inject kawa-geiser into running remote REPL
 
 It may be useful in cases where the user wants to have =Kawa= but not =kawa-geiser= as an actual dependency for her/his project, while still being able to use geiser-kawa. For example, for live inspection of a running java application.
 
