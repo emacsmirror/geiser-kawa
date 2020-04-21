@@ -1,4 +1,4 @@
-;;; geiser-kawa.el --- geiser support for Kawa scheme -*- lexical-binding:t -*-
+;;; geiser-kawa.el --- Kawa scheme support for Geiser -*- lexical-binding:t -*-
 
 ;; Copyright (C) 2018 Mathieu Lirzin <mthl@gnu.org>
 ;; Copyright (C) 2019, 2020 spellcard199 <spellcard199@protonmail.com>
@@ -99,7 +99,7 @@ Argument MODULE argument passed by Geiser."
 
 ;; TODO
 (defun geiser-kawa--enter-debugger ()
-  "TODO")
+  "TODO.")
 
 (defun geiser-kawa--display-error (module key msg)
   "Needed to show output (besides result).
