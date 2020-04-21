@@ -7,13 +7,22 @@
 ;; have received a copy of the license along with this program. If
 ;; not, see <http://www.xfree86.org/3.3.6/COPYRIGHT2.html#5>.
 
+;;; Commentary:
+;; Tests for testing elisp side of `geiser-kawa`.
+
+(require 'buttercup)
+
 (require 'geiser)
 (require 'geiser-mode)
 (require 'geiser-kawa)
 (require 'gnus-util)
 
-(defun switch-to-and-reset-scratch-buffer()
-  (switch-to-buffer "*scratch*")
+;;; Code:
+
+(defun geiser-kawa-test--switch-reset-work-buffer()
+  "Reset *test-geiser-kawa*.
+New tests expect a clean buffer to run."
+  (switch-to-buffer "*geiser-kawa-test*")
   (delete-region (point-min) (point-max))
   (geiser-impl--set-buffer-implementation 'kawa))
 
@@ -24,19 +33,20 @@
 
   (print "[test-geiser-kawa.el] Running `mvnw package'...")
 
-  (let ((mvnw-buf (geiser-kawa-deps-mvnw-package geiser-kawa-dir)))
-    (while compilation-in-progress
-      (sleep-for 0 250)))
+  (geiser-kawa-deps-mvnw-package geiser-kawa-dir)
+
+  (while compilation-in-progress
+    (sleep-for 0 250))
 
   (print "[test-geiser-kawa.el] `mvnw package' done.")
 
   (setq geiser-kawa-use-included-kawa t)
-  (switch-to-and-reset-scratch-buffer)
+  (geiser-kawa-test--switch-reset-work-buffer)
   (run-kawa)
   (geiser-mode))
 
  (before-each
-  (switch-to-and-reset-scratch-buffer))
+  (geiser-kawa-test--switch-reset-work-buffer))
 
  (it (concat "can find " geiser-kawa-deps-jar-path)
      (expect
@@ -73,7 +83,7 @@
         (goto-char (point-max))
         (geiser-expand-last-sexp)
         (geiser-debug--with-buffer
-          (buffer-substring-no-properties (point-min) (point-max))))
+         (buffer-substring-no-properties (point-min) (point-max))))
       :to-equal "(if #t (begin (quote foo) (quote bar)))"))
 
  (it "can `geiser:completions'"
@@ -103,4 +113,6 @@
 
  )
 
-;;; test-geiser-kawa.el ends here
+(provide 'geiser-kawa-test)
+
+;;; geiser-kawa-test.el ends here
