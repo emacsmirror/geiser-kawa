@@ -172,7 +172,7 @@ displays them in a dedicated buffer."
   ;; Eval our Kawa code and insert result of evaluation in the buffer
   ;; we switched to above.
   (insert
-   (geiser-kawa-util--eval/result
+   (geiser-kawa-util--eval-get-result
      ;; The same kawa code as above, quoted so that it's not evaluated
      ;; as elisp.
     '(let* ((cg (kawadevutil.shaded.io.github.classgraph.ClassGraph))

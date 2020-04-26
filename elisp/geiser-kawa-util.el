@@ -62,8 +62,8 @@ Drawback is that `RET' must be valid elisp, while
 reader."
   (car (read-from-string (cadr (assoc 'result ret)))))
 
-(defun geiser-kawa-util--eval/result (sexp-or-str
-                                      &optional retort-result)
+(defun geiser-kawa-util--eval-get-result (sexp-or-str
+                                          &optional retort-result)
   "Alternative to `geiser-eval--send/result' with custom behavior.
 - `sexp-or-str' is wrapped by:
   (geiser:eval (interaction-environment) ...)

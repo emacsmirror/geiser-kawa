@@ -229,7 +229,7 @@ Argument CODE-STR is a string containing the code where completion
 must happen.  It must be syntactically correct Kawa scheme.
 Argument CURSOR-INDEX is an integer representing where the cursor is
 inside `CURSOR-STR'."
-  (geiser-kawa-util--eval/result
+  (geiser-kawa-util--eval-get-result
    `(geiser:kawa-devutil-complete-expr-tree
      ,code-str
      ,cursor-index)))
