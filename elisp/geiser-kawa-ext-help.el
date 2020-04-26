@@ -93,7 +93,7 @@ the manual are more responsive.")
           (backward-char 3) ;; Move point over link
           (eww-browse-url (car (eww-links-at-point))) ;; Follow link
           (recenter-top-bottom 'top))
-      (message (format "No match for `%s' found in Kawa's epub manual." needle)))))
+      (message "No match for `%s' found in Kawa's epub manual." needle))))
 
 
 ;; Support for manual in .info format
@@ -115,8 +115,8 @@ the manual are more responsive.")
           (recenter-top-bottom 'top))
       (progn
         (quit-window)
-        (message (format "No match for `%s' found in Kawa's info manual."
-                         needle))))))
+        (message "No match for `%s' found in Kawa's info manual."
+                 needle)))))
 
 ;;;; Dispatch to epub or info manual function based on
 ;;;; `geiser-kawa-manual-path's file extension.

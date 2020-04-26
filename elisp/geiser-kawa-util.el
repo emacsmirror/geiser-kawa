@@ -33,8 +33,8 @@ procedure in Kawa.  It can be either a `list' or a `string'."
   ;;   ...
   (let ((valid-types '(string cons))
         (sexp-or-str-type (type-of sexp-or-str)))
-    (when (not (member sexp-or-str-type
-                       valid-types))
+    (unless (member sexp-or-str-type
+                    valid-types)
       (error
        (concat "Wrong type argument: Type of `sexp-or-str' is "
                (format "`%S'" sexp-or-str-type) ". "

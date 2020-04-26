@@ -136,7 +136,7 @@ members of package as returned by kawa-geiser."
           ((equal completion-type "SYMBOLS_PLUS_PACKAGEMEMBERS")
            (geiser-kawa-devutil-complete--user-choice-symbols-plus-packagemembers
             compl-data))
-          ((equal completion-type nil)
+          ((null completion-type)
 	   (message "No completions found.")
 	   "")
           (t (error (format "[Unexpected `completion-type' value] completion-type: %s"
