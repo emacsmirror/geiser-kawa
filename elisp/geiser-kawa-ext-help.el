@@ -120,7 +120,7 @@ the manual are more responsive.")
 
 ;;;; Dispatch to epub or info manual function based on
 ;;;; `geiser-kawa-manual-path's file extension.
-(defun geiser-kawa-manual--look-up (id mod)
+(defun geiser-kawa-manual--look-up (id _mod)
   "Use epub or info manual depending on `geiser-kawa-manual-path'.
 
 Argument ID is the symbol to look for in the manual.

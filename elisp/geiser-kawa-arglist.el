@@ -104,7 +104,7 @@ Argument BINARY argument passed by Geiser."
     ;; "Kawa 3.1.1"
     (cadr (split-string progname-plus-version " "))))
 
-(defun geiser-kawa--repl-startup (remote)
+(defun geiser-kawa--repl-startup (_remote)
   "Geiser's repl-startup.
 Argument REMOTE passed by Geiser."
   ;; Does nothing for now. Keeping for reference.

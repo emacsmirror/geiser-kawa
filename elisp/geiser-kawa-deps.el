@@ -77,7 +77,7 @@ at REPL startup."
   (add-hook 'compilation-finish-functions
             #'geiser-kawa-deps--run-kawa--remove-compil-hook))
 
-(defun geiser-kawa-deps--run-kawa--remove-compil-hook(buf desc)
+(defun geiser-kawa-deps--run-kawa--remove-compil-hook(_buf _desc)
   "Hook called when compilation finishes.
 Runs `run-kawa' without the `geiser-kawa-deps--run-kawa--advice'
 advice and removes itself from `compilation-finish-functions',

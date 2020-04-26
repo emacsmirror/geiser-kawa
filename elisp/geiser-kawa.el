@@ -97,7 +97,7 @@ Argument MODULE argument passed by Geiser."
 (defun geiser-kawa--enter-debugger ()
   "TODO.")
 
-(defun geiser-kawa--display-error (module key msg)
+(defun geiser-kawa--display-error (_module key msg)
   "Needed to show output (besides result).
 Modified from geiser-guile.el.
 Argument MODULE is passed by Geiser.
