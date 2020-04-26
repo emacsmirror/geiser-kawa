@@ -3,16 +3,12 @@
 ;; Copyright (C) 2018 Mathieu Lirzin <mthl@gnu.org>
 ;; Copyright (C) 2019, 2020 spellcard199 <spellcard199@protonmail.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the Modified BSD License. You should
-;; have received a copy of the license along with this program. If
-;; not, see <http://www.xfree86.org/3.3.6/COPYRIGHT2.html#5>.
-
 ;; Author: spellcard199 <spellcard199@protonmail.com>
 ;; Maintainer: spellcard199 <spellcard199@protonmail.com>
 ;; Keywords: languages, kawa, scheme, geiser
 ;; Homepage: https://gitlab.com/spellcard199/geiser-kawa
 ;; Package-Requires: ((emacs "26.1") (geiser "0.11.2"))
+;; SPDX-License-Identifier: BSD-3-Clause
 ;; Version: 0.0.1
 
 ;; This file is NOT part of GNU Emacs.

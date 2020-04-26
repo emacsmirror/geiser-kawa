@@ -2,10 +2,7 @@
 
 ;; Copyright (C) 2019, 2020 spellcard199 <spellcard199@protonmail.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the Modified BSD License. You should
-;; have received a copy of the license along with this program. If
-;; not, see <http://www.xfree86.org/3.3.6/COPYRIGHT2.html#5>.
+;; SPDX-License-Identifier: BSD-3-Clause
 
 ;;; Commentary:
 ;; Global variables that geiser-kawa's sub-packages can require.

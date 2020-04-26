@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2020 spellcard199 <spellcard199@protonmail.com>
- * This is free software;  for terms and warranty disclaimer see ./COPYING.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 package kawageiser.docutil;
