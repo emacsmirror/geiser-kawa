@@ -140,7 +140,25 @@ Argument MSG is passed by Geiser."
 (geiser-impl--add-to-alist 'regexp "\\.sld$" 'kawa t)
 
 ;; Check for kawa-geiser jar each time `run-kawa' is called.
-(geiser-kawa-deps--run-kawa--advice-add)
+
+(defun geiser-kawa-run-kawa ()
+  "Alternative to `run-kawa' that also does check for dependencies.
+Compared to the `run-kawa' function defined by
+`define-geiser-implementation', this function also prompts the user to
+package java dependencies if the file at `geiser-kawa-deps-jar-path'
+does not exists.
+Since both here and in `geiser-kawa-deps--run-kawa--compil-hook' we
+are calling `run-geiser' instead of `run-kawa' directly, one can also
+advice `run-kawa' overriding it with `geiser-kawa-run-kawa' without it
+becoming an infinite recursion."
+  (interactive)
+  (if (file-exists-p geiser-kawa-deps-jar-path)
+      (run-geiser 'kawa)
+    (when (y-or-n-p
+           (concat
+            "`geiser-kawa' depends on additional java libraries. "
+            "Do you want to download and compile them now?"))
+      (geiser-kawa-deps-mvnw-package--and-run-kawa))))
 
 (provide 'geiser-kawa)
 

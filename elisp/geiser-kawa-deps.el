@@ -14,10 +14,12 @@
 
 ;; Depends on global vars:
 ;; `geiser-kawa-dir'
+;; `geiser-kawa-deps-jar-path'
 
 ;;; Code:
 
 (require 'cl-lib)
+(require 'geiser-repl)
 (require 'geiser-kawa-globals)
 
 (cl-defun geiser-kawa-deps-mvnw-package
@@ -42,74 +44,27 @@ at REPL startup."
         (goto-char (point-max))
         (switch-to-buffer-other-window save-buf)))))
 
-
-;;; Manage the `geiser-kawa-deps--run-kawa--advice' advice for
-;;; `run-kawa'.
-;; `run-kawa' is adviced at the end of `geiser.kawa.el' by calling
-;; `geiser-kawa-deps--run-kawa--advice-add' after `run-kawa' has been
-;; defined by `define-geiser-implementation'.
-;; `geiser-kawa-deps--run-kawa--advice' prompts the user for running
-;; `mvnw package' when:
-;; 1. the user uses `run-kawa'
-;; 2. the fat .jar file that `geiser-kawa' depends on is not found.
-
-(defun geiser-kawa-deps--run-kawa--advice-add()
-  "Add our advice to `run-kawa'."
-  (add-function :override
-                (symbol-function 'run-kawa)
-                #'geiser-kawa-deps--run-kawa--advice))
-
-(defun geiser-kawa-deps--run-kawa--advice-remove()
-  "Remove our advice from `run-kawa'."
-  (remove-function (symbol-function 'run-kawa)
-                   #'geiser-kawa-deps--run-kawa--advice))
-
-(defun geiser-kawa-deps--run-kawa-unadviced()
-  "Call `run-kawa' without triggering our advice."
-  (geiser-kawa-deps--run-kawa--advice-remove)
-  (unwind-protect
-      (run-kawa)
-    (geiser-kawa-deps--run-kawa--advice-add)))
-
-(defun geiser-kawa-deps--run-kawa--add-compil-hook()
-  "Run `run-kawa' unadviced the next time a compilation finishes."
-  ;; The added hook auto-removes itself after being called once.
-  (add-hook 'compilation-finish-functions
-            #'geiser-kawa-deps--run-kawa--remove-compil-hook))
-
-(defun geiser-kawa-deps--run-kawa--remove-compil-hook(_buf _desc)
-  "Hook called when compilation finishes.
-Runs `run-kawa' without the `geiser-kawa-deps--run-kawa--advice'
-advice and removes itself from `compilation-finish-functions',
-effectively running `run-kawa' unadviced only for one compilation.
+(defun geiser-kawa-deps--run-kawa--compil-hook(_buf _desc)
+  "Hook to run Kawa when the next compilation finishes.
+Only starts Kawa if after compilation is done file at
+`geiser-kawa-deps-jar-path' exists.
+Removes itself from `compilation-finish-functions' so that Kawa is
+started only for the next compilation.
 Argument BUF is passed by Emacs when compilation finishes.
 Argument DESC is passed by Emacs when compilation finishes."
-  (geiser-kawa-deps--run-kawa-unadviced)
+  (when (file-exists-p geiser-kawa-deps-jar-path)
+    ;; Using `run-geiser' instead of `run-kawa' so that callers can
+    ;; also be advices of `run-kawa' without it becoming an infinite
+    ;; recursion.
+    (run-geiser 'kawa))
   (remove-hook 'compilation-finish-functions
-               #'geiser-kawa-deps--run-kawa--remove-compil-hook))
+               #'geiser-kawa-deps--run-kawa--compil-hook))
 
-(defun geiser-kawa-deps--run-kawa--advice(&optional install-if-absent)
-  "Actual advicing function for `run-kawa'.
-
-If the `geiser-kawa-deps-jar-path' path:
-- exists: just run unadviced `run-kawa'
-- does not exist:
-    1. ask user for permission to run `mvnw package'
-    2. if user answers `yes':
-        1. download, compile, package `kawa-geiser'
-        2. run `run-kawa' after compilation finishes
-
-Optional argument INSTALL-IF-ABSENT: when non-nil, always prompt and
-recompile kawa-geiser, ignoring existing jar."
-  (if (file-exists-p geiser-kawa-deps-jar-path)
-      (geiser-kawa-deps--run-kawa-unadviced)
-    (when (or install-if-absent
-              (y-or-n-p
-               (concat
-                "geiser-kawa depends on additional java libraries. "
-                "Do you want to download and compile them now?")))
-      (geiser-kawa-deps--run-kawa--add-compil-hook)
-      (geiser-kawa-deps-mvnw-package geiser-kawa-dir))))
+(defun geiser-kawa-deps-mvnw-package--and-run-kawa ()
+  "Run `mvn package' and run Kawa if resulting jar exists."
+  (add-hook 'compilation-finish-functions
+            #'geiser-kawa-deps--run-kawa--compil-hook)
+  (geiser-kawa-deps-mvnw-package geiser-kawa-dir))
 
 (provide 'geiser-kawa-deps)
 
