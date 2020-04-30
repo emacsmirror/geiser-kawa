@@ -44,7 +44,7 @@ at REPL startup."
         (goto-char (point-max))
         (switch-to-buffer-other-window save-buf)))))
 
-(defun geiser-kawa-deps--run-kawa--compil-hook(_buf _desc)
+(defun geiser-kawa-deps--run-kawa--compile-hook(_buf _desc)
   "Hook to run Kawa when the next compilation finishes.
 Only starts Kawa if after compilation is done file at
 `geiser-kawa-deps-jar-path' exists.
@@ -58,12 +58,12 @@ Argument DESC is passed by Emacs when compilation finishes."
     ;; recursion.
     (run-geiser 'kawa))
   (remove-hook 'compilation-finish-functions
-               #'geiser-kawa-deps--run-kawa--compil-hook))
+               #'geiser-kawa-deps--run-kawa--compile-hook))
 
 (defun geiser-kawa-deps-mvnw-package--and-run-kawa ()
   "Run `mvn package' and run Kawa if resulting jar exists."
   (add-hook 'compilation-finish-functions
-            #'geiser-kawa-deps--run-kawa--compil-hook)
+            #'geiser-kawa-deps--run-kawa--compile-hook)
   (geiser-kawa-deps-mvnw-package geiser-kawa-dir))
 
 (provide 'geiser-kawa-deps)

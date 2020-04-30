@@ -152,7 +152,7 @@ Compared to the `run-kawa' function defined by
 `define-geiser-implementation', this function also prompts the user to
 package java dependencies if the file at `geiser-kawa-deps-jar-path'
 does not exists.
-Since both here and in `geiser-kawa-deps--run-kawa--compil-hook' we
+Since both here and in `geiser-kawa-deps--run-kawa--compile-hook' we
 are calling `run-geiser' instead of `run-kawa' directly, one can also
 advice `run-kawa' overriding it with `geiser-kawa-run-kawa' without it
 becoming an infinite recursion."
