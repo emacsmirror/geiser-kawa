@@ -86,8 +86,8 @@ Argument CLASSPATH is a string containing the classpath."
    geiser-kawa--arglist))
 
 (defun geiser-kawa--version-command (binary)
-  "Return command to get kawa version.
-Argument BINARY argument passed by Geiser."
+  "Return version of Kawa as started by Geiser.
+Argument BINARY is passed by Geiser."
   (let* ((program (if geiser-kawa-use-included-kawa
                       "java"
                     binary))
@@ -105,9 +105,12 @@ Argument BINARY argument passed by Geiser."
     (cadr (split-string progname-plus-version " "))))
 
 (defun geiser-kawa--repl-startup (_remote)
-  "Geiser's repl-startup.
+  "Function used as Geiser's `repl-startup' method.
+From `geiser-repl.el': Function called after the REPL has been
+initialised.  All Geiser functionality is available to you at that
+point.
 Argument REMOTE passed by Geiser."
-  ;; Does nothing for now. Keeping for reference.
+  ;; Does nothing for now.  Keeping for reference.
   ;; (let ((geiser-log-verbose-p t))
   ;; (compilation-setup t))
   )
