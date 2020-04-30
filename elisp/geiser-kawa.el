@@ -136,8 +136,13 @@ Argument MSG is passed by Geiser."
   (case-sensitive nil)
   (external-help geiser-kawa-manual--look-up))
 
-(geiser-impl--add-to-alist 'regexp "\\.scm$" 'kawa t)
-(geiser-impl--add-to-alist 'regexp "\\.sld$" 'kawa t)
+;; > usually when you add to auto-mode-alists the regular expression
+;; > should resemble, e.g., \\.scm\\' rather than \\.scm$ by
+;; > convention.
+;; Source:
+;;  https://github.com/melpa/melpa/pull/6858#issuecomment-621596527
+(geiser-impl--add-to-alist 'regexp "\\.scm\\'" 'kawa t)
+(geiser-impl--add-to-alist 'regexp "\\.sld\\'" 'kawa t)
 
 ;; Check for kawa-geiser jar each time `run-kawa' is called.
 
