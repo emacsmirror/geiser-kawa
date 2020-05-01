@@ -59,7 +59,7 @@ Optional argument ARGS passed by Geiser."
     ((no-values) "(geiser:no-values)")
 
     (t
-     (let ((form (mapconcat 'identity args " ")))
+     (let ((form (mapconcat #'identity args " ")))
        (format "(geiser:%s %s)" proc form)))))
 
 ;; TODO
