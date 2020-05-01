@@ -2,11 +2,11 @@
 * geiser-kawa
 ** Project description
 
-=geiser-kawa= is a geiser implementation for Kawa Scheme.
+=geiser-kawa= adds support for Kawa Scheme to [[https://gitlab.com/jaor/geiser/][Geiser]].
 
 It has 2 parts:
-- =geiser-kawa=: elisp package inside the =elisp= directory that gives the name to the whole project
-- =kawa-geiser=: included maven project written using Kawa's Java API. When it's imported from a Kawa scheme REPL, procedures required by =geiser-kawa= are added to the Kawa environment
+- =geiser-kawa=: elisp package inside the =elisp= directory that gives the name to the whole project.
+- =kawa-geiser=: included maven project written using Kawa's Java API. When it's imported from a Kawa scheme REPL, procedures needed by =geiser-kawa= are added to the Kawa environment.
 
 ** Supported Kawa versions
 :PROPERTIES:
@@ -79,7 +79,7 @@ To try geiser-kawa you need neither Maven nor Kawa:
      2. run =./mvnw package=
 5. Add the elisp directory inside this project to Emacs' =load-path=:
     : (add-to-list 'load-path "<path-to-geiser-kawa/elisp>")
-6. Require =kawa-geiser=:
+6. Require =geiser-kawa=:
     : (require 'geiser-kawa)
 7. Either:
      - Set the =geiser-kawa-use-included-kawa= variable to non-nil: to use the Kawa version included in =geiser-kawa=
@@ -89,21 +89,40 @@ To try geiser-kawa you need neither Maven nor Kawa:
 8. Run kawa:
     : M-x run-kawa
 
+** Install using MELPA
+
+1. Prerequisites:
+     - =emacs=
+     - =java= available through your =$PATH=
+     - =$JAVA_HOME= environment variable set
+2. Install =geiser-kawa= using MELPA
+3. Package java dependencies:
+  : =M-x geiser-kawa-deps-mvnw-package=
+4. Require =geiser-kawa=
+  : (require 'geiser-kawa)
+5. Either:
+     - Set the =geiser-kawa-use-included-kawa= variable to non-nil: to use the Kawa version included in =geiser-kawa=
+     - [[https://www.gnu.org/software/kawa/Getting-Kawa.html][Get Kawa]] and either:
+         - set the =geiser-kawa-binary= variable
+         - add =kawa= to =$PATH=
+6. Run kawa:
+    : M-x run-kawa
+
 ** About manual lookup
 
 To use the =geiser-doc-lookup-manual= feature you need a copy of the Kawa manual. You can either compile it from the Kawa source code or extract it from the pre-compiled Kawa release available on the Kawa website: https://www.gnu.org/software/kawa/Getting-Kawa.html.
 
-Once you have the manual in either .info or .epub format, set the =geiser-kawa-manual-path= elisp variable to the path of the file.
+Once you have the manual in =.info= or =.epub= format, set the =geiser-kawa-manual-path= elisp variable to the path of the file.
 
 ** About Autodoc
 
-Double quotes around parameters: the reason why the arguments are enclosed in double quotes in autodoc is because special characters (e.g. =]=) aren't read as part of a symbol by the elisp reader that geiser relies on to display autodoc data. To work-around this limitation parameters are represented by using strings instead of symbols.
+Double quotes around parameters: the reason why the arguments are enclosed in double quotes in autodoc is because special characters (e.g. =]=) aren't read as part of a symbol by the elisp reader that geiser relies on to display autodoc data. To work-around this limitation parameters are represented by strings instead of symbols.
 
-Parameter names: parameter names are retrieved using the =gnu.bytecode= package (included in Kawa) for reading local variables in Java methods' bytecode. Since parameters are not always present in bytecode as local variables, especially for java, when not available the parameter name defaults to =argN=, where =N= is a number.
+Parameter names: parameter names are retrieved using the =gnu.bytecode= package (included in Kawa) for reading local variables in Java methods' bytecode. Since parameters are not always present in bytecode as local variables (especially for methods written in Java), when not available the parameter name defaults to =argN=, where =N= is a number.
 
-[[https://gitlab.com/kashell/Kawa/-/blob/master/gnu/kawa/lispexpr/LangObjType.java][LangObjType objects]]: these are special objects that may behave like procedures. When these are called as procedures, a constructor java method is called. This method does not have the same name as the symbol you insert in Kawa, so I decided that it was a good idea to show the method name as part of the displayed module, preceded by a colon. I don't know if it's a good idea, but it would be easy to change if it's not.
+[[https://gitlab.com/kashell/Kawa/-/blob/master/gnu/kawa/lispexpr/LangObjType.java][LangObjType objects]]: these are special objects that may behave like procedures. When these are called as procedures, a java method that returns a new object is called. This method does not have the same name as the symbol you insert in Kawa, so I thought it was a good idea to show the method name as part of the displayed module, preceded by a colon. Maybe I was wrong, in that case the behavior it's easy to change.
 
-Autodoc for macros: not supported.
+Autodoc for macros: not supported. I don't know how get parameters for macros in Kawa.
 
 ** About completion for Java package and class members (packages, classes, methods, fields)
 :PROPERTIES:
@@ -127,7 +146,7 @@ Supported forms (with issues) are:
 Unsupported forms:
     - Kawa's star-colon notation (e.g: =(*:getClass "foobar")=)
 
-How it works (the region getting part is quite rudimentray):
+How it works:
 1. A region of the current buffer and cursor point inside it are sent to a Kawa procedure
 2. kawa-devutil's pattern matching is run on the resulting Expression tree
 3. If a match is found, the data is returned to Emacs
@@ -136,13 +155,13 @@ You can find some examples and known issues in [[https://gitlab.com/spellcard199
 
 ** Extending =geiser-kawa=
 
-Since you can get the result of a Kawa expression through geiser you can extend =geiser-kawa= blending both Elisp and Kawa, with the limitations due to the fact it's strings that are actually passed back and forth.
+Since you can get the result of a Kawa expression through geiser you can extend =geiser-kawa= blending both Elisp and Kawa, with the limitation that it's always strings that are passed back and forth. The rest of this section is an example.
 
-The rest of this section is an actual example. Let's say we wanted to extend =geiser-kawa= to list all the classes available in the default classloaders.
+Let's say we wanted to extend =geiser-kawa= to list all the classes available in the default classloaders.
 
-Since =kawa-devutil= and its dependencies are dependencies of =kawa-geiser=, we already have the [[https://github.com/classgraph/classgraph][Classgraph]] included in =kawa-geiser= even though =kawa-devutil= shades it to: =kawadevutil.shaded.io.github.classgraph=:
+Since =kawa-geiser= (the java counterpart of =geiser-kawa=) has [[https://gitlab.com/spellcard199/kawa-devutil][kawa-devutil]] in its dependencies, we already have [[https://github.com/classgraph/classgraph][Classgraph]] included in =kawa-geiser=, shaded to =kawadevutil.shaded.io.github.classgraph= by =kawa-devutil= itself. This means we can already traverse classpath and classloaders.
 
-This is some simple Kawa code to get a list of all classes in the default classloaders using the ClassGraph library included in =kawa-geiser=:
+This is some simple Kawa code to get a list of all the classes in the default classloaders using the ClassGraph library included in =kawa-geiser=:
 
 #+BEGIN_SRC scheme
 (let* ((cg (kawadevutil.shaded.io.github.classgraph.ClassGraph))
@@ -186,7 +205,7 @@ displays them in a dedicated buffer."
        (scanResult:getAllClasses)))))
 #+END_SRC
 
-Once you evaluate this elisp function, if you have an active Kawa repl associated with the current buffer and use =M-x my-geiser-kawa-list-all-classes=, after some seconds (there are many thousands of classes) a list of classes will be displayed in a new buffer.
+Now every time you use =M-x my-geiser-kawa-list-all-classes= and have an active Kawa repl associated with the current buffer, after some seconds (there may be tenths of thousands of classes) a new buffer containing the list of available classes will be displayed.
 
 ** Adding java dependencies to Kawa / Embedding kawa-geiser in your java application
 
@@ -218,7 +237,7 @@ The easiest way is:
 
 ** Is Windows supported?
 
-It seems to work, but I don't usually use Windows.
+I don't usually use Windows, but it seems to work.
 
 ** Difference from [[https://gitlab.com/spellcard199/geiser-kawa-scheme][geiser-kawa-scheme]]
 
@@ -227,13 +246,13 @@ This project (geiser-kawa) is a translation/rewrite of [[https://gitlab.com/spel
 - Easier to inculde external java libraries via maven central for additional functionalities
 - Tooling for Java is excellent, tooling for Kawa is not
 - Fully static type checking: probably it's because I'm bad at programming, but it helps me a lot
-- The old geiser-kawa's scheme implementation logic has been split in 2 projects:
+- The non-elisp part of =geiser-kawa-scheme= has been split in 2 projects:
     - [[https://www.gitlab.com/spellcard199/kawa-devutil][kawa-devutil]]: functions that take care of getting data and general functionalities (e.g. output-capturing eval)
     - kawa-geiser:
-        - the included maven project
-        - gets data and features through kawa-devutil and wraps the result in the geiser protocol
-- Possibility to share code between kawa-devutil and Kawa's Language Server
-- Since kawa-devutil is now a different project from geiser-kawa, one could use it to avoid re-writing the data-getting logic if she/he wanted to implement a Kawa server for a tool other than geiser (e.g. nrepl, jupyter, swank/slime)
+        - maven project included in =geiser-kawa=
+        - uses =kawa-devutil='s features to get relevant data and returns it as a scheme structure readable by geiser
+- Possibility to share code between =kawa-devutil= and other software written in Java (e.g. Kawa itself)
+- Since =kawa-devutil= is now a project separate from =geiser-kawa=, one could use it to avoid re-writing the data-getting logic if she/he wanted to implement a Kawa server for a tool other than geiser (e.g. nrepl, jupyter, swank/slime) or a standalone Java application.
 
 geiser-kawa VS geiser-kawa-scheme - recap table:
 
