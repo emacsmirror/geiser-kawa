@@ -57,13 +57,13 @@ Only versions of Kawa > 3.1 are supported, mostly due to the fact that before th
   : cd geiser-kawa
 4. Tell cask to install emacs dependencies:
   : cask install
-5. Pull kawa-geiser maven dependencies (the first time takes ~1 minute), compile them and start geiser-kawa's scratch buffer and repl:
+5. Pull =kawa-geiser='s maven dependencies (the first time takes ~1 minute), compile them and start geiser-kawa's scratch buffer and repl:
   : cask emacs -Q --load quickstart.el
 6. You should now have an emacs frame containing a scratch buffer in =geiser-mode= and a repl buffer, both with geiser-kawa support
 
 To try geiser-kawa you need neither Maven nor Kawa:
 - =mvnw= ([[https://github.com/takari/maven-wrapper][maven-wrapper]]) takes care of downloading a project-specific Maven version
-- kawa-geiser has [[https://gitlab.com/groups/kashell/][Kawa's master branch]] as one of its dependencies. When =quickstart.el= calls =./mvnw package= (wrapped by =geiser-kawa-deps-mvnw-package=), it produces a jar that includes kawa-geiser and all its dependencies, including Kawa itself.
+- =kawa-geiser= has [[https://gitlab.com/groups/kashell/][Kawa's master branch]] as one of its dependencies. When =quickstart.el= calls =./mvnw package= (wrapped by =geiser-kawa-deps-mvnw-package=), it produces a jar that includes =kawa-geiser= and all its dependencies, including Kawa itself.
 
 ** Manual Installation
 
@@ -110,7 +110,7 @@ To try geiser-kawa you need neither Maven nor Kawa:
 
 ** About manual lookup
 
-To use the =geiser-doc-lookup-manual= feature you need a copy of the Kawa manual. You can either compile it from the Kawa source code or extract it from the pre-compiled Kawa release available on the Kawa website: https://www.gnu.org/software/kawa/Getting-Kawa.html.
+To use the =geiser-doc-lookup-manual= feature you need a copy of the Kawa manual. You can either compile it from the Kawa source code or extract it from the pre-compiled Kawa release available on the Kawa website: [[https://www.gnu.org/software/kawa/Getting-Kawa.html]].
 
 Once you have the manual in =.info= or =.epub= format, set the =geiser-kawa-manual-path= elisp variable to the path of the file.
 
@@ -148,7 +148,7 @@ Unsupported forms:
 
 How it works:
 1. A region of the current buffer and cursor point inside it are sent to a Kawa procedure
-2. kawa-devutil's pattern matching is run on the resulting Expression tree
+2. =kawa-devutil='s pattern matching is run on the resulting Expression tree
 3. If a match is found, the data is returned to Emacs
 
 You can find some examples and known issues in [[https://gitlab.com/spellcard199/kawa-devutil][kawa-devutil]]'s README.
@@ -161,7 +161,7 @@ Let's say we wanted to extend =geiser-kawa= to list all the classes available in
 
 Since =kawa-geiser= (the java counterpart of =geiser-kawa=) has [[https://gitlab.com/spellcard199/kawa-devutil][kawa-devutil]] in its dependencies, we already have [[https://github.com/classgraph/classgraph][Classgraph]] included in =kawa-geiser=, shaded to =kawadevutil.shaded.io.github.classgraph= by =kawa-devutil= itself. This means we can already traverse classpath and classloaders.
 
-This is some simple Kawa code to get a list of all the classes in the default classloaders using the ClassGraph library included in =kawa-geiser=:
+This is some simple Kawa scheme code to get a list of all the classes in the default classloaders using the ClassGraph library included in =kawa-geiser=:
 
 #+BEGIN_SRC scheme
 (let* ((cg (kawadevutil.shaded.io.github.classgraph.ClassGraph))
@@ -207,7 +207,7 @@ displays them in a dedicated buffer."
 
 Now every time you use =M-x my-geiser-kawa-list-all-classes= and have an active Kawa repl associated with the current buffer, after some seconds (there may be tenths of thousands of classes) a new buffer containing the list of available classes will be displayed.
 
-** Adding java dependencies to Kawa / Embedding kawa-geiser in your java application
+** Adding java dependencies to Kawa / Embedding =kawa-geiser= in your java application
 
 The easiest way is:
 1. Create a new maven project
@@ -241,20 +241,20 @@ I don't usually use Windows, but it seems to work.
 
 ** Difference from [[https://gitlab.com/spellcard199/geiser-kawa-scheme][geiser-kawa-scheme]]
 
-This project (geiser-kawa) is a translation/rewrite of [[https://gitlab.com/spellcard199/geiser-kawa-scheme][geiser-kawa-scheme]], which has been my first attempt at writing geiser-kawa. After geiser-kawa-scheme confirmed me that a geiser-kawa implementation was possible I decided to rewrite the Kawa side using Kawa's Java API, for the several reasons:
+This project (geiser-kawa) is a translation/rewrite of [[https://gitlab.com/spellcard199/geiser-kawa-scheme][geiser-kawa-scheme]], which has been my first attempt at writing =geiser-kawa=. After =geiser-kawa-scheme= confirmed me that a =geiser-kawa= implementation was possible I decided to rewrite the Kawa side using Kawa's Java API, for the several reasons:
 - Easier to add as a scripting language in Java projects: just add the jitpack resolver and this project's repository as a dependency
 - Easier to inculde external java libraries via maven central for additional functionalities
 - Tooling for Java is excellent, tooling for Kawa is not
 - Fully static type checking: probably it's because I'm bad at programming, but it helps me a lot
 - The non-elisp part of =geiser-kawa-scheme= has been split in 2 projects:
     - [[https://www.gitlab.com/spellcard199/kawa-devutil][kawa-devutil]]: functions that take care of getting data and general functionalities (e.g. output-capturing eval)
-    - kawa-geiser:
+    - =kawa-geiser=:
         - maven project included in =geiser-kawa=
         - uses =kawa-devutil='s features to get relevant data and returns it as a scheme structure readable by geiser
 - Possibility to share code between =kawa-devutil= and other software written in Java (e.g. Kawa itself)
-- Since =kawa-devutil= is now a project separate from =geiser-kawa=, one could use it to avoid re-writing the data-getting logic if she/he wanted to implement a Kawa server for a tool other than geiser (e.g. nrepl, jupyter, swank/slime) or a standalone Java application.
+- Since =kawa-devutil= is now a project separate from =geiser-kawa=, one could use it to avoid re-writing the data-getting logic if she/he wanted to implement a Kawa server for a tool other than Geiser (e.g. nrepl, jupyter, swank/slime) or a standalone Java application.
 
-geiser-kawa VS geiser-kawa-scheme - recap table:
+=geiser-kawa= VS =geiser-kawa-scheme= - recap table:
 
 |                                | geiser-kawa     | geiser-kawa-scheme |
 |--------------------------------+-----------------+--------------------|
