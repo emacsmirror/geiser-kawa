@@ -43,8 +43,10 @@
 
 Rationale for using java instead of emacs:
 - Kawa is already a dependency.
-- Kawa/java is more portable that using emacs' `arc-mode',
-  which relies on external executables being installed."
+- Kawa/java is more portable that using Emacs' `arc-mode',
+  which relies on external executables being installed.
+
+EPUB-PATH defaults to `geiser-kawa-manual-path's value."
   (with-temp-buffer
     (geiser-impl--set-buffer-implementation 'kawa)
     (geiser-eval--send/result
@@ -61,6 +63,7 @@ the manual are more responsive.")
 
 (cl-defun geiser-kawa-manual--epub-search
     (needle &optional (epub-path geiser-kawa-manual-path))
+  "Search for NEEDLE inside Kawa's manual at EPUB-PATH."
   ;; Validate args
   (cl-assert (stringp needle) nil (type-of needle))
   (cl-assert (stringp epub-path) nil (type-of epub-path))
@@ -100,7 +103,7 @@ the manual are more responsive.")
 
 (cl-defun geiser-kawa-manual--info-search
     (needle &optional (info-path geiser-kawa-manual-path))
-  ;; Validate args
+  "Search for NEEDLE inside Kawa's manual at INFO-PATH."
   (cl-assert (stringp needle) nil (type-of needle))
   (cl-assert (stringp info-path) nil (type-of info-path))
   (cl-assert (string-suffix-p ".info" info-path) nil info-path)
@@ -125,17 +128,16 @@ the manual are more responsive.")
 
 Argument ID is the symbol to look for in the manual.
 Argument MOD is passed by geiser, but it's not used here yet."
-  (cl-assert (file-exists-p geiser-kawa-manual-path)
-             nil (format
-                  (concat
-                   "Kawa's manual file specified by "
-                   "`geiser-kawa-manual-path' does not exist: \"%s\". "
-                   "You can either compile it yourself or "
-                   "find it inside the pre-compiled Kawa release. "
-                   "See: https://www.gnu.org/software/kawa/Getting-Kawa.html. "
-                   "When you have a copy, set the `geiser-kawa-manual-path' "
-                   "elisp variable to where the .info or .epub file is located. ")
-                  geiser-kawa-manual-path))
+  (cl-assert
+   (file-exists-p geiser-kawa-manual-path)
+   nil (format
+        "Kawa's manual file specified by `geiser-kawa-manual-path' \
+does not exist: \"%s\".  You can either compile it yourself or find it \
+inside the pre-compiled Kawa release. See: \
+https://www.gnu.org/software/kawa/Getting-Kawa.html. When you have a \
+copy, set the `geiser-kawa-manual-path' elisp variable to where the \
+.info or .epub file is located."
+        geiser-kawa-manual-path))
   (cond
    ((string-suffix-p ".epub" geiser-kawa-manual-path)
     (geiser-kawa-manual--epub-search (symbol-name id)

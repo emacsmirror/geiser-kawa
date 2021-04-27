@@ -40,14 +40,17 @@ If `geiser-kawa-binary' is a string, just return it."
                (geiser-kawa-deps-jar-path
                 geiser-kawa-deps-jar-path))
   "If the following conditions are true...:
-- `geiser-kawa-use-included-kawa' is nil
-- `geiser-kawa-binary' filepath exists
+- `GEISER-KAWA-USE-INCLUDED-KAWA' is nil
+- `GEISER-KAWA-BINARY' filepath exists
 - the `lib' dir under `geiser-kawa-binary's parent dir exists
 ... then: add to classpath at repl startup:
 - the 4 .jar files under the `lib' dir
 - fat jar with `geiser-kawa' dependencies
 ... else: add to the classpath just:
-- fat jar with `geiser-kawa' dependencies"
+- fat jar with `geiser-kawa' dependencies
+
+GEISER-KAWA-DEPS-JAR-PATH defaults to the value of
+`geiser-kawa-deps-jar-path'."
   (let ((jars
          (append
           (if (and

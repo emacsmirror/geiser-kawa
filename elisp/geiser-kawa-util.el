@@ -35,11 +35,10 @@ procedure in Kawa.  It can be either a `list' or a `string'."
         (sexp-or-str-type (type-of sexp-or-str)))
     (unless (member sexp-or-str-type
                     valid-types)
-      (error
-       (concat "Wrong type argument: Type of `sexp-or-str' is "
-               (format "`%S'" sexp-or-str-type) ". "
-               "Valid types for `sexp-or-str' can only be: "
-               (format "%S" valid-types)))))
+      (error "Wrong type argument: Type of `sexp-or-str' is `%s'.  \
+Valid types for `sexp-or-str' can only be %S"
+             sexp-or-str-type
+             valid-types)))
 
   (let* ((code-as-str (cond ((equal (type-of sexp-or-str)
                                     'string)

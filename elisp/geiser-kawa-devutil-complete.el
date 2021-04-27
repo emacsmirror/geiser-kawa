@@ -139,8 +139,8 @@ members of package as returned by kawa-geiser."
           ((null completion-type)
 	   (message "No completions found.")
 	   "")
-          (t (error (format "[Unexpected `completion-type' value] completion-type: %s"
-                            (prin1-to-string completion-type)))))))
+          (t (error "[Unexpected `completion-type' value] completion-type: %s"
+                    (prin1-to-string completion-type))))))
 
 (defun geiser-kawa-devutil-complete--code-point-from-toplevel ()
   "Return an association list of data needed for completion."
