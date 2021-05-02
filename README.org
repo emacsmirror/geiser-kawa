@@ -52,7 +52,7 @@ Only versions of Kawa > 3.1 are supported, mostly due to the fact that before th
      - =java=, =emacs= and [[https://github.com/cask/cask][cask]] available through your =$PATH=
      - =$JAVA_HOME= environment variable set
 2. Clone this repository
-  : git clone "https://gitlab.com/spellcard199/geiser-kawa.git"
+  : git clone "https://gitlab.com/emacs-geiser/kawa.git"
 3. cd into the cloned dir:
   : cd geiser-kawa
 4. Tell cask to install emacs dependencies:
@@ -73,7 +73,7 @@ To try geiser-kawa you need neither Maven nor Kawa:
      - =$JAVA_HOME= environment variable set
 2. Install the =geiser= package in Emacs
 3. Clone this repository
-  : git clone "https://gitlab.com/spellcard199/geiser-kawa.git"
+  : git clone "https://gitlab.com/emacs-geiser/kawa.git"
 4. Package java dependencies:
      1. cd into =geiser-kawa=
      2. run =./mvnw package=
@@ -223,8 +223,8 @@ The easiest way is:
      - =kawa-geiser= dependency (you can replace =-SNAPSHOT= with commit SHA):
        : <dependencies>
        :   <dependency>
-       :     <groupId>com.gitlab.spellcard199</groupId>
-       :     <artifactId>geiser-kawa</artifactId>
+       :     <groupId>com.gitlab.emacs-geiser</groupId>
+       :     <artifactId>kawa</artifactId>
        :     <version>-SNAPSHOT</version>
        :   </dependency>
        : </dependencies>
