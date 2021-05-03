@@ -2,7 +2,7 @@
 * geiser-kawa
 ** Project description
 
-=geiser-kawa= adds support for Kawa Scheme to [[https://gitlab.com/jaor/geiser/][Geiser]].
+=geiser-kawa= adds support for Kawa Scheme to [[https://gitlab.com/emacs-geiser/geiser/][Geiser]].
 
 It has 2 parts:
 - =geiser-kawa=: elisp package inside the =elisp= directory that gives the name to the whole project.
