@@ -6,6 +6,7 @@
 
 package kawageiser;
 
+import gnu.kawa.functions.Format;
 import gnu.lists.IString;
 import gnu.lists.LList;
 import gnu.mapping.Environment;
@@ -20,13 +21,16 @@ public class GeiserCompleteSymbol {
     }
 
     public static LList getCompletions(IString prefix, Environment env) {
-        ArrayList<Symbol> resultArrList = new ArrayList<>();
+        ArrayList<String> resultArrList = new ArrayList<>();
         env.enumerateAllLocations().forEachRemaining(
                 loc -> {
                     Symbol sym = loc.getKeySymbol();
                     String symName = sym.getName();
                     if (symName.contains(prefix)) {
-                        resultArrList.add(sym);
+                        // Emacs' completion-at-point works fine with a list of symbols,
+                        // but completion through company-mode works only if we display a list
+                        // of strings, each delimited by double-quotes.
+                        resultArrList.add(Format.formatToString(0, "~S", symName));
                     }
                 }
         );
