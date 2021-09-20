@@ -73,10 +73,12 @@ public class GeiserAutodoc {
         String formattedAutodoc = null;
         try {
             ArrayList<Object> autodocList = new ArrayList<>();
-            for (Object symId : (LList) ids) {
-                AutodocDataForSymId autodocDataForSymId =
-                        new AutodocDataForSymId((Symbol) symId, env, lang);
-                autodocList.add(autodocDataForSymId.toLList());
+            for (Object autodocQuery : (LList) ids) {
+                // Currently autodoc is only supported for symbols.
+                if (Symbol.class.isAssignableFrom(autodocQuery.getClass())) {
+                    AutodocDataForSymId autodocDataForSymId = new AutodocDataForSymId((Symbol) autodocQuery, env, lang);
+                    autodocList.add(autodocDataForSymId.toLList());
+                }
             }
             formattedAutodoc = Format
                     .format("~S", LList.makeList(autodocList))
